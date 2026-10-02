@@ -1,0 +1,14 @@
+# Optional: Simple Voice Chat (proximity voice). Enable it with
+#   cp voice-chat.override.example.yml docker-compose.override.yml
+# Docker Compose reads docker-compose.override.yml from this directory automatically.
+services:
+  minecraft:
+    environment:
+      # Downloaded from Modrinth at start, matching TYPE and VERSION. Add further Modrinth
+      # projects here, one per line; removing a line removes that plugin on the next start.
+      MODRINTH_PROJECTS: |
+        simple-voice-chat
+    ports:
+      # Clients connect to the "port" set in data/plugins/voicechat/voicechat-server.properties
+      # (default 24454), so host and container port must be equal and match that setting.
+      - "${MINECRAFT_VOICE_PORT:-24454}:${MINECRAFT_VOICE_PORT:-24454}/udp"

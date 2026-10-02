@@ -1,0 +1,30 @@
+# Stop → tar these paths → start. The server saves the world on SIGTERM (stop_grace_period 90s).
+# Missing paths are skipped, so the list covers both world layouts.
+
+# World. Since Minecraft/Paper 26.1 all dimensions live in world/dimensions/.
+# If you set LEVEL to another world name, replace "world" in these three lines.
+data/world
+# Nether and End of worlds that have not been migrated to 26.1 yet (older Paper layout).
+data/world_nether
+data/world_the_end
+
+# Plugins: jars, their configs and their data (economy balances, homes, claims, ...).
+# A world restored without them loses everything the plugins stored.
+data/plugins
+
+# Paper configuration (paper-global.yml, paper-world-defaults.yml).
+data/config
+
+# Server configuration in the server root.
+data/server.properties
+data/bukkit.yml
+data/spigot.yml
+data/commands.yml
+data/permissions.yml
+data/help.yml
+
+# Operators, whitelist and bans.
+data/ops.json
+data/whitelist.json
+data/banned-players.json
+data/banned-ips.json

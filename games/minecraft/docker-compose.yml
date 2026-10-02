@@ -1,0 +1,42 @@
+# Minecraft Java Edition (Paper) — see README.md in this directory.
+services:
+  minecraft:
+    # The tag selects the image release and its Java runtime, not the game version.
+    # MINECRAFT_VERSION below selects the game version; it must run on this tag's Java.
+    image: itzg/minecraft-server:${MINECRAFT_TAG:-2026.9.2-java25}
+    restart: unless-stopped
+    # On SIGTERM the image's process wrapper sends "stop" over RCON and waits up to
+    # STOP_DURATION (image default 60 s) for the world to save. The grace period must be
+    # longer, or Docker kills the server in the middle of the save.
+    stop_grace_period: 90s
+    environment:
+      # The image refuses to start until the Minecraft EULA is accepted; the user does that.
+      EULA: "${MINECRAFT_EULA:?set MINECRAFT_EULA=TRUE in .env after reading the Minecraft EULA}"
+      TYPE: PAPER
+      VERSION: ${MINECRAFT_VERSION:-26.2}
+      MEMORY: ${MINECRAFT_MEMORY:-4G}
+      MOTD: ${MINECRAFT_MOTD:-A Paper Minecraft server}
+      DIFFICULTY: ${MINECRAFT_DIFFICULTY:-easy}
+      # true: only players on whitelist.json may join; add them over RCON (see README).
+      ENABLE_WHITELIST: ${MINECRAFT_ENABLE_WHITELIST:-true}
+      # RCON stays inside the block network. The image would otherwise generate a new random
+      # password on every start, which the rcon tools service could not know.
+      ENABLE_RCON: "true"
+      RCON_PASSWORD: "${MINECRAFT_RCON_PASSWORD:?set MINECRAFT_RCON_PASSWORD in .env}"
+      UID: ${PUID:-1000}
+      GID: ${PGID:-1000}
+      TZ: ${TZ:-Etc/UTC}
+    ports:
+      - "${MINECRAFT_PORT:-25565}:25565/tcp"
+    volumes:
+      - ./data:/data
+    # The image ships its own healthcheck (mc-health, a Minecraft status query); no override needed.
+
+  # One-shot RCON client: `docker compose run --rm rcon <command>`.
+  rcon:
+    image: itzg/rcon-cli:${RCON_CLI_TAG:-1.7.7}
+    profiles: ["tools"]
+    environment:
+      RCON_HOST: minecraft
+      RCON_PORT: "25575"
+      RCON_PASSWORD: "${MINECRAFT_RCON_PASSWORD:?set MINECRAFT_RCON_PASSWORD in .env}"
