@@ -1,0 +1,9 @@
+# Stop → tar these paths → start. The server saves the galaxy on SIGTERM, so a stopped server
+# leaves a consistent folder; a copy taken while it runs can catch a half-written save.
+#
+# The galaxy folder holds everything that belongs to this server: the save (sectors, players),
+# server.ini (including rconPassword), modconfig.lua, the access lists and the server logs.
+data/galaxy
+#
+# Not listed: data/backups — the game's own hourly backups of the same galaxy. Add it if you want
+# those inside the archive too; it only makes the archive larger.

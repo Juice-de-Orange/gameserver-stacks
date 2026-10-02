@@ -1,0 +1,49 @@
+# Avorion dedicated server — see README.md before the first start.
+services:
+  avorion:
+    # The tag is the game version: the image runs SteamCMD at build time, not at start.
+    image: rfvgyhn/avorion:${AVORION_TAG:-2.5.13.44140}
+    restart: unless-stopped
+    # The server is PID 1 and saves the whole galaxy on SIGTERM. Every visited sector is a file,
+    # so a large galaxy needs time; a kill in the middle of that write is how data gets lost.
+    stop_grace_period: 180s
+    # Appended to the image's entrypoint (`./bin/AvorionServer --galaxy-name avorion_galaxy`).
+    # The ports are passed explicitly so that host and container port stay equal: the server
+    # announces them to Steam.
+    command:
+      - --port
+      - "${AVORION_PORT:-27000}"
+      - --query-port
+      - "${AVORION_QUERY_PORT:-27003}"
+      - --steam-query-port
+      - "${AVORION_STEAM_QUERY_PORT:-27020}"
+      - --steam-master-port
+      - "${AVORION_STEAM_MASTER_PORT:-27021}"
+      - --admin
+      - "${AVORION_ADMIN:?set AVORION_ADMIN (your SteamID64) in .env}"
+    ports:
+      - "${AVORION_PORT:-27000}:${AVORION_PORT:-27000}/tcp"
+      - "${AVORION_PORT:-27000}:${AVORION_PORT:-27000}/udp"
+      - "${AVORION_QUERY_PORT:-27003}:${AVORION_QUERY_PORT:-27003}/udp"
+      - "${AVORION_STEAM_QUERY_PORT:-27020}:${AVORION_STEAM_QUERY_PORT:-27020}/udp"
+      - "${AVORION_STEAM_MASTER_PORT:-27021}:${AVORION_STEAM_MASTER_PORT:-27021}/udp"
+      # RCON (27015/tcp) is deliberately not published; the rcon service below reaches it on the
+      # block's own network.
+    volumes:
+      # The mount IS the galaxy folder: save, server.ini, modconfig.lua, access lists, logs.
+      - ./data/galaxy:/home/steam/.avorion/galaxies/avorion_galaxy
+      # The game's own hourly backups (server.ini `backups=true`); without this mount they
+      # pile up inside the container and vanish when it is recreated.
+      - ./data/backups:/home/steam/.avorion/backups
+
+  # Source RCON client: `docker compose run --rm rcon /players`.
+  # Avorion reads its RCON password only from `rconPassword` in data/galaxy/server.ini; the image
+  # has no variable for it. AVORION_RCON_PASSWORD must hold the same value (README, Administration).
+  rcon:
+    image: itzg/rcon-cli:${RCON_CLI_TAG:-1.7.7}
+    profiles: [tools]
+    environment:
+      RCON_HOST: avorion
+      # Avorion's default; must match `rconPort` in server.ini.
+      RCON_PORT: "27015"
+      RCON_PASSWORD: "${AVORION_RCON_PASSWORD:?set AVORION_RCON_PASSWORD in .env}"
