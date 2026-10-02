@@ -1,0 +1,16 @@
+# Runtime state of the game blocks — never commit worlds, backups or secrets.
+games/*/.env
+games/*/data/
+games/*/backups/
+.stack-running
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Release workspace (not part of the project)
+.opensource/
+# Local compose overrides (e.g. games/minecraft/voice-chat.override.example.yml copied)
+games/*/docker-compose.override.yml
