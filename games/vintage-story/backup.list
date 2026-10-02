@@ -1,0 +1,10 @@
+# Stop → tar these paths → start. The server saves on its stop signal (SIGINT from the image).
+# Mods belong to the world: blocks and items a mod added are broken when the world is loaded
+# without that mod, so the mods and their settings (ModConfig) are archived with the save.
+# Not listed on purpose: data/Logs and the server's own backup folders (Backups, BackupSaves).
+data/Saves
+data/Playerdata
+data/Mods
+data/ModConfig
+data/serverconfig.json
+data/servermagicnumbers.json

@@ -1,0 +1,43 @@
+# Vintage Story dedicated server — see README.md before the first start.
+services:
+  vintagestory:
+    # The game server is baked into the image; the tag names the game version (static-v<version>).
+    image: devidian/vintagestory:${VINTAGESTORY_TAG:-static-v1.22.6}
+    restart: unless-stopped
+    # The image stops the server with SIGINT; the server saves the world and exits. That took
+    # under a second on a small world (earlier image version); the margin is for large worlds.
+    stop_grace_period: 60s
+    environment:
+      # Set explicitly so the layout in ./data does not depend on the image default
+      # (a subfolder of /gamedata): serverconfig.json, Saves/, Mods/ ... sit directly in ./data.
+      VS_DATA_PATH: /gamedata
+    volumes:
+      - ./data:/gamedata
+    ports:
+      # Since game version 1.20 the server uses UDP on the same port in addition to TCP.
+      # The container side stays 42420 = "Port" in serverconfig.json; change only the host side.
+      - "${VINTAGESTORY_PORT:-42420}:42420/tcp"
+      - "${VINTAGESTORY_PORT:-42420}:42420/udp"
+    # Keeps stdin open so the server console can be reached with `docker compose attach`
+    # (the image publishes the same variant as its tty example).
+    stdin_open: true
+    tty: true
+    healthcheck:
+      # The port only accepts connections once the world is loaded. The first start generates
+      # the world, hence the long start period.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/42420"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10m
+
+  # Optional remote console. Works ONLY with the third-party "Vintage RCON" server mod installed
+  # and configured (see README, Administration). The RCON port is never published.
+  rcon:
+    image: itzg/rcon-cli:${RCON_CLI_TAG:-1.7.7}
+    profiles: ["tools"]
+    environment:
+      RCON_HOST: vintagestory
+      RCON_PORT: ${VINTAGESTORY_RCON_PORT:-42425}
+      # Empty unless you set it in .env together with the mod; the game itself has no secret.
+      RCON_PASSWORD: "${VINTAGESTORY_RCON_PASSWORD:-}"
