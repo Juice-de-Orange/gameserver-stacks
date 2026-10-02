@@ -1,0 +1,247 @@
+#!/usr/bin/env bash
+# stack — convenience wrapper around the game blocks in games/<game>/.
+# Every block also works on its own with plain `docker compose`; this script only saves typing and
+# adds consistent backups. Run `./stack help` for usage.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GAMES_DIR="$ROOT/games"
+STATE_FILE="${STACK_STATE_FILE:-$ROOT/.stack-running}"
+
+die() { echo "stack: $*" >&2; exit 1; }
+info() { echo "stack: $*" >&2; }
+
+usage() {
+  cat <<'EOF'
+Usage: ./stack <command> [game] [args]
+
+  list                      all games and whether they are running
+  up <game>                 start (creates the containers on first run)
+  down <game>               stop and remove the containers (data in ./data stays)
+  stop <game> | start <game> | restart <game>
+  status <game>             docker compose ps
+  logs <game> [args]        docker compose logs (e.g. -f --tail 100)
+  rcon <game> <command...>  run a console command (games with an rcon tools service)
+  backup <game>             stop → archive the paths in backup.list → start again
+  restore <game> <archive>  stop → move current data aside → unpack the archive → start
+  stop-all                  stop every running game and remember which ones ran
+  start-recorded            start the games that stop-all recorded
+  check [game]              validate compose files (CI): fails closed without secrets,
+                            passes with every required value filled
+  help                      this text
+
+<game> is a directory name under games/, e.g. valheim or project-zomboid.
+EOF
+}
+
+games() {
+  local d
+  for d in "$GAMES_DIR"/*/; do
+    [[ -f "$d/docker-compose.yml" ]] && basename "$d"
+  done
+}
+
+block_dir() {
+  local game="${1:-}"
+  [[ -n "$game" ]] || die "missing <game>; see ./stack list"
+  [[ "$game" =~ ^[a-z0-9-]+$ ]] || die "invalid game name: $game"
+  [[ -f "$GAMES_DIR/$game/docker-compose.yml" ]] || die "unknown game: $game (see ./stack list)"
+  echo "$GAMES_DIR/$game"
+}
+
+compose() { # compose <game> <docker compose args...>
+  local dir
+  dir="$(block_dir "$1")"
+  shift
+  (cd "$dir" && docker compose "$@")
+}
+
+require_env() {
+  local dir
+  dir="$(block_dir "$1")"
+  [[ -f "$dir/.env" ]] || die "$1: no .env — copy games/$1/.env.example to games/$1/.env and fill it in"
+}
+
+is_running() {
+  [[ -n "$(compose "$1" ps --status running --quiet 2>/dev/null)" ]]
+}
+
+backup_paths() { # prints the non-comment lines of backup.list
+  local list
+  list="$(block_dir "$1")/backup.list"
+  [[ -f "$list" ]] || die "$1: backup.list is missing"
+  grep -vE '^[[:space:]]*(#|$)' "$list" | sed 's/[[:space:]]*$//'
+}
+
+cmd_list() {
+  local g state
+  for g in $(games); do
+    if [[ ! -f "$GAMES_DIR/$g/.env" ]]; then
+      state="not configured"
+    elif is_running "$g"; then
+      state="running"
+    else
+      state="stopped"
+    fi
+    printf '%-18s %s\n' "$g" "$state"
+  done
+}
+
+cmd_backup() {
+  local game="$1" dir ts archive was_running=0 p
+  local -a paths=() present=()
+  dir="$(block_dir "$game")"
+  require_env "$game"
+  mapfile -t paths < <(backup_paths "$game")
+  [[ ${#paths[@]} -gt 0 ]] || die "$game: backup.list has no paths"
+  for p in "${paths[@]}"; do
+    [[ "$p" != /* && "$p" != *..* ]] || die "$game: backup.list path must be relative: $p"
+    if [[ -e "$dir/$p" ]]; then present+=("$p"); else info "$game: skipping missing path $p"; fi
+  done
+  [[ ${#present[@]} -gt 0 ]] || die "$game: none of the backup paths exist yet (start the server once)"
+
+  if is_running "$game"; then
+    was_running=1
+    info "$game: stopping for a consistent copy"
+    compose "$game" stop
+  fi
+  # Restart the server even if tar fails.
+  trap '[[ $was_running -eq 1 ]] && compose "$game" start >/dev/null' EXIT
+
+  mkdir -p "$dir/backups"
+  ts="$(date -u +%Y%m%dT%H%M%SZ)"
+  archive="$dir/backups/$game-$ts.tar.gz"
+  if ! tar -C "$dir" -czf "$archive" -- "${present[@]}"; then
+    rm -f "$archive"
+    die "$game: tar failed — if ./data belongs to another UID, run with sudo"
+  fi
+  info "$game: wrote ${archive#"$ROOT"/} ($(du -h "$archive" | cut -f1))"
+
+  trap - EXIT
+  if [[ $was_running -eq 1 ]]; then
+    compose "$game" start
+    info "$game: started again"
+  fi
+}
+
+cmd_restore() {
+  local game="$1" archive="${2:-}" dir ts aside was_running=0 p
+  local -a paths=()
+  dir="$(block_dir "$game")"
+  [[ -n "$archive" && -f "$archive" ]] || die "usage: ./stack restore <game> <archive.tar.gz>"
+  archive="$(cd "$(dirname "$archive")" && pwd)/$(basename "$archive")"
+  mapfile -t paths < <(backup_paths "$game")
+
+  if [[ "${STACK_YES:-}" != 1 ]]; then
+    read -r -p "Restore $game from $(basename "$archive")? Current data is moved aside. [y/N] " reply
+    [[ "$reply" == [yY] ]] || die "aborted"
+  fi
+
+  if is_running "$game"; then
+    was_running=1
+    compose "$game" stop
+  fi
+  ts="$(date -u +%Y%m%dT%H%M%SZ)"
+  aside="$dir/backups/pre-restore-$ts"
+  # On failure the server stays stopped: its data may be half moved. Fix the cause (often: ./data
+  # belongs to the container's UID — rerun with sudo), then move the data back from $aside.
+  trap 'info "$game: restore FAILED — server left stopped; previous data (if moved) is in ${aside#"$ROOT"/}"' ERR
+  for p in "${paths[@]}"; do
+    if [[ -e "$dir/$p" ]]; then
+      mkdir -p "$aside/$(dirname "$p")"
+      mv "$dir/$p" "$aside/$p"
+    fi
+  done
+  tar -C "$dir" -xzf "$archive"
+  trap - ERR
+  info "$game: restored; previous data is in ${aside#"$ROOT"/}"
+  if [[ $was_running -eq 1 ]]; then
+    compose "$game" start
+  fi
+}
+
+cmd_stop_all() {
+  local g
+  : >"$STATE_FILE"
+  for g in $(games); do
+    [[ -f "$GAMES_DIR/$g/.env" ]] || continue
+    if is_running "$g"; then
+      echo "$g" >>"$STATE_FILE"
+      info "$g: stopping"
+      compose "$g" stop
+    fi
+  done
+}
+
+cmd_start_recorded() {
+  local g
+  [[ -f "$STATE_FILE" ]] || { info "nothing recorded"; return 0; }
+  while read -r g; do
+    [[ -n "$g" ]] || continue
+    info "$g: starting"
+    compose "$g" start || info "$g: start failed"
+  done <"$STATE_FILE"
+  rm -f "$STATE_FILE"
+}
+
+cmd_check() {
+  local g dir tmp failed=0
+  local -a list
+  if [[ -n "${1:-}" ]]; then list=("$1"); else mapfile -t list < <(games); fi
+  tmp="$(mktemp)"
+  for g in "${list[@]}"; do
+    dir="$(block_dir "$g")"
+    for f in .env.example README.md backup.list; do
+      [[ -f "$dir/$f" ]] || { echo "FAIL $g: $f missing"; failed=1; }
+    done
+    [[ -f "$dir/.env.example" ]] || continue
+    # 1) Every required value filled with a dummy → must validate.
+    sed -E 's/^([A-Za-z_][A-Za-z0-9_]*)=$/\1=ci-dummy-value/' "$dir/.env.example" >"$tmp"
+    if (cd "$dir" && docker compose --env-file "$tmp" config -q); then
+      echo "ok   $g: compose config with all values set"
+    else
+      echo "FAIL $g: compose config with all values set"; failed=1
+    fi
+    # 2) .env.example as shipped → must refuse if it leaves required values empty.
+    if grep -qE '^[A-Za-z_][A-Za-z0-9_]*=$' "$dir/.env.example"; then
+      if (cd "$dir" && docker compose --env-file .env.example config -q) 2>/dev/null; then
+        echo "FAIL $g: compose accepts the empty values of .env.example (secrets must use \${VAR:?…})"
+        failed=1
+      else
+        echo "ok   $g: refuses to start with the empty values of .env.example"
+      fi
+    fi
+  done
+  rm -f "$tmp"
+  return "$failed"
+}
+
+main() {
+  local cmd="${1:-help}"
+  shift || true
+  case "$cmd" in
+    list) cmd_list ;;
+    up) require_env "${1:-}"; compose "$1" up -d ;;
+    down) compose "${1:-}" down ;;
+    stop | start | restart) require_env "${1:-}"; compose "$1" "$cmd" ;;
+    status) compose "${1:-}" ps ;;
+    logs) g="${1:-}"; shift || true; compose "$g" logs "$@" ;;
+    rcon)
+      g="${1:-}"; shift || true
+      require_env "$g"
+      compose "$g" --profile tools config --services | grep -qx rcon \
+        || die "$g: no rcon service — see games/$g/README.md, Administration"
+      [[ $# -gt 0 ]] || die "usage: ./stack rcon <game> <command...>"
+      compose "$g" --profile tools run --rm rcon "$@"
+      ;;
+    backup) cmd_backup "${1:-}" ;;
+    restore) cmd_restore "${1:-}" "${2:-}" ;;
+    stop-all) cmd_stop_all ;;
+    start-recorded) cmd_start_recorded ;;
+    check) cmd_check "${1:-}" ;;
+    help | -h | --help) usage ;;
+    *) usage >&2; exit 2 ;;
+  esac
+}
+
+main "$@"
