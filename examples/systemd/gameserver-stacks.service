@@ -1,0 +1,22 @@
+# Stops the running game servers cleanly before Docker goes down, and starts the same ones again
+# after boot. Adjust WorkingDirectory/ExecStart to where you cloned the repository, then:
+#   sudo cp examples/systemd/gameserver-stacks.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now gameserver-stacks.service
+[Unit]
+Description=Game servers (gameserver-stacks): clean stop on shutdown, restart on boot
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/path/to/gameserver-stacks
+ExecStart=/path/to/gameserver-stacks/stack start-recorded
+ExecStop=/path/to/gameserver-stacks/stack stop-all
+# A large world can take minutes to save. This must be longer than the longest
+# stop_grace_period of the blocks you run.
+TimeoutStopSec=600
+
+[Install]
+WantedBy=multi-user.target

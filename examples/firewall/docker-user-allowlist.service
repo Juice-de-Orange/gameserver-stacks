@@ -1,0 +1,20 @@
+# Re-applies the DOCKER-USER allow-list after every Docker start (Docker recreates the chain).
+#   sudo cp examples/firewall/docker-user-allowlist.sh /usr/local/sbin/
+#   sudo cp examples/firewall/docker-user-allowlist.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now docker-user-allowlist.service
+[Unit]
+Description=DOCKER-USER allow-list for published game ports
+Requires=docker.service
+After=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=EXT_IF=eth0
+Environment="ALLOW_TCP=25565"
+Environment="ALLOW_UDP=34197 2456:2458"
+ExecStart=/usr/local/sbin/docker-user-allowlist.sh
+
+[Install]
+WantedBy=docker.service
