@@ -1,0 +1,53 @@
+name: Bug report
+description: A block does not start, does not save, or the docs are wrong.
+labels: [bug]
+body:
+  - type: dropdown
+    id: game
+    attributes:
+      label: Game
+      options:
+        - Project Zomboid
+        - Minecraft
+        - Vintage Story
+        - Arma Reforger
+        - Valheim
+        - Avorion
+        - Factorio
+        - stack helper / repository
+    validations:
+      required: true
+  - type: input
+    id: tag
+    attributes:
+      label: Image tag
+      description: The value of the *_TAG variable in your .env (or "default").
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. cp .env.example .env, set …
+        2. docker compose up -d
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "`docker compose logs --tail 200`. Remove passwords, tokens, IPs and player names first."
+      render: text
+  - type: input
+    id: host
+    attributes:
+      label: Host
+      description: OS, CPU architecture, `docker compose version`.

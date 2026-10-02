@@ -1,0 +1,11 @@
+# The game images are pinned through ${*_TAG:-…} defaults, which Dependabot cannot parse; image
+# updates are deliberate and manual (see CONTRIBUTING.md). Dependabot keeps the workflows current.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

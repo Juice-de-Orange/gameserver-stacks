@@ -1,0 +1,33 @@
+name: New game
+description: Propose a block for another game.
+labels: [new game]
+body:
+  - type: input
+    id: game
+    attributes:
+      label: Game
+    validations:
+      required: true
+  - type: input
+    id: image
+    attributes:
+      label: Docker image
+      description: Link to the image and its source repository. Which licence does it have?
+    validations:
+      required: true
+  - type: textarea
+    id: facts
+    attributes:
+      label: What the block needs to know
+      description: |
+        Ports and protocols, how the server is administered (RCON, other console, none),
+        where the world and the config live, whether the server saves on SIGTERM,
+        how mods work. See docs/CONVENTIONS.md.
+    validations:
+      required: true
+  - type: checkboxes
+    id: run
+    attributes:
+      label: Tested
+      options:
+        - label: I have run this image myself and connected with a client.

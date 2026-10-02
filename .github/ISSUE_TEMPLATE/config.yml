@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Juice-de-Orange/gameserver-stacks/security/advisories/new
+    about: Please report security problems privately, not as a public issue.
+  - name: Conventions for a game block
+    url: https://github.com/Juice-de-Orange/gameserver-stacks/blob/main/docs/CONVENTIONS.md
+    about: Read this before proposing a new game.
