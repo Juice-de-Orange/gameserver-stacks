@@ -1,0 +1,55 @@
+services:
+  valheim:
+    # The tag is the image version (scripts, SteamCMD, base OS), not the game version: the image
+    # downloads the current Valheim server from Steam at every start. See README "Updates".
+    image: ghcr.io/community-valheim-tools/valheim-server:${VALHEIM_TAG:-1.4.0}
+    restart: unless-stopped
+    # The image stops Valheim with SIGINT so it saves the world, escalates after 29 s per step,
+    # and its own supervisor waits up to 90 s. The image README recommends a 120 s stop timeout.
+    stop_grace_period: 120s
+    # Optional: lets the Steam library raise its thread priority. Without it the log shows
+    # "failed to set thread priority" and the server still runs.
+    cap_add:
+      - SYS_NICE
+    environment:
+      SERVER_NAME: "${VALHEIM_SERVER_NAME:-My Valheim Server}"
+      WORLD_NAME: "${VALHEIM_WORLD_NAME:-Dedicated}"
+      # Required. Without it the image falls back to its publicly documented default password.
+      SERVER_PASS: "${VALHEIM_SERVER_PASS:?set VALHEIM_SERVER_PASS in .env (at least 5 characters, not part of the server name)}"
+      SERVER_PUBLIC: "${VALHEIM_PUBLIC:-true}"
+      # Valheim announces this port to Steam, so the container listens on the same port the host
+      # publishes; the query port is always this value + 1.
+      SERVER_PORT: "${VALHEIM_PORT:-2456}"
+      CROSSPLAY: "${VALHEIM_CROSSPLAY:-false}"
+      BEPINEX: "${VALHEIM_BEPINEX:-false}"
+      SERVER_ARGS: "${VALHEIM_SERVER_ARGS:-}"
+      # `-` instead of `:-` keeps an empty value empty: the image reads an empty schedule as "off".
+      UPDATE_CRON: "${VALHEIM_UPDATE_CRON-*/15 * * * *}"
+      RESTART_CRON: "${VALHEIM_RESTART_CRON-10 5 * * *}"
+      # The image's own backups archive the world while the server may be writing it. Backups of
+      # this block go through `stack backup`, which stops the server first (backup.list).
+      BACKUPS: "false"
+      # The image starts as root, chowns /config and /opt/valheim to PUID:PGID and runs the game
+      # as that user, so ./data stays readable for the host user doing backups.
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
+      TZ: "${TZ:-Etc/UTC}"
+    ports:
+      - "${VALHEIM_PORT:-2456}:${VALHEIM_PORT:-2456}/udp"
+      - "${VALHEIM_QUERY_PORT:-2457}:${VALHEIM_QUERY_PORT:-2457}/udp"
+      - "${VALHEIM_CROSSPLAY_PORT:-2458}:${VALHEIM_CROSSPLAY_PORT:-2458}/udp"
+    volumes:
+      # Worlds, admin/ban/permitted lists, BepInEx plugins and their config.
+      - ./data/config:/config
+      # Game files downloaded by SteamCMD plus its manifest cache. Without this mount every
+      # re-created container downloads the whole server again and in-place updates can fail.
+      - ./data/server:/opt/valheim
+    healthcheck:
+      # The image writes "running" once the server process has bound its game or query port.
+      # A server that is up but cannot open its world never gets there.
+      test: ["CMD-SHELL", "grep -qx running /var/run/valheim/valheim-server.status"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      # The first start downloads about 1 GB and generates the world.
+      start_period: 15m

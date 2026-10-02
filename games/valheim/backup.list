@@ -1,0 +1,13 @@
+# Stop → tar these paths → start. Valheim has no save command that can be sent from outside; it
+# saves every 20 minutes and on shutdown. Only a stopped server gives a consistent copy.
+#
+# The whole worlds folder, not single files: a Valheim 1.0 world is a directory of many files,
+# an older world is a .db/.fwl pair that only loads together, and the server keeps .old copies.
+data/config/worlds_local
+# Access control. Without them a restored server lets everyone in and nobody is admin.
+data/config/adminlist.txt
+data/config/bannedlist.txt
+data/config/permittedlist.txt
+# BepInEx config, plugins and patchers (only present with VALHEIM_BEPINEX=true).
+data/config/bepinex
+# Not listed: data/server (game files, downloaded again from Steam at start).
