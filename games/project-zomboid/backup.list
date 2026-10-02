@@ -1,0 +1,10 @@
+# Stop → tar these paths → start. The image saves the world on SIGTERM, so a stopped server
+# leaves a consistent copy behind.
+# The world (Saves/Multiplayer/<server name>).
+data/zomboid/Saves
+# Configuration: <server name>.ini (incl. Mods=, WorkshopItems=, Map=), SandboxVars, spawn regions.
+data/zomboid/Server
+# Player accounts, access levels and whitelist (<server name>.db).
+data/zomboid/db
+# data/workshop is left out: Steam re-downloads it from WorkshopItems= at start. Add it if you
+# need to survive an item being removed from the Workshop.

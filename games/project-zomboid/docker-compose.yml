@@ -1,0 +1,53 @@
+# Project Zomboid dedicated server (Build 42).
+# Image: danixu86/project-zomboid-dedicated-server — see README.md before the first start.
+
+services:
+  zomboid:
+    # The tag is the game build: the server files are downloaded into the image when it is built,
+    # not at container start. Bump it deliberately (README, "Updates and versions").
+    image: danixu86/project-zomboid-dedicated-server:${ZOMBOID_TAG:-42.21-release-2}
+    restart: unless-stopped
+    # On SIGTERM the image's entrypoint types `quit` into the server console, and `quit` saves the
+    # world before it exits. Docker's default 10 s would kill the server in the middle of that save.
+    stop_grace_period: 120s
+    environment:
+      # Names the files in Server/ and the world folder in Saves/Multiplayer/. Changing it later
+      # starts a new, empty world (the old one stays on disk).
+      SERVERNAME: "${ZOMBOID_SERVER_NAME:-servertest}"
+      ADMINUSERNAME: "${ZOMBOID_ADMIN_USERNAME:-admin}"
+      ADMINPASSWORD: "${ZOMBOID_ADMIN_PASSWORD:?set ZOMBOID_ADMIN_PASSWORD in .env}"
+      # Setting a password is what turns RCON on; the port stays internal (see the rcon service).
+      RCONPASSWORD: "${ZOMBOID_RCON_PASSWORD:?set ZOMBOID_RCON_PASSWORD in .env}"
+      # Join password. Empty leaves whatever Password= the .ini already holds.
+      PASSWORD: "${ZOMBOID_PASSWORD:-}"
+      PUBLIC: "${ZOMBOID_PUBLIC:-false}"
+      DISPLAYNAME: "${ZOMBOID_DISPLAY_NAME:-My Project Zomboid Server}"
+      # Same value on both sides of the port mappings below, so the server listens on the port
+      # that is actually published.
+      PORT: "${ZOMBOID_PORT:-16261}"
+      UDPPORT: "${ZOMBOID_UDP_PORT:-16262}"
+      # JVM heap. The image only applies these when both are set.
+      MIN_MEMORY: "${ZOMBOID_MIN_MEMORY:-2048m}"
+      MAX_MEMORY: "${ZOMBOID_MAX_MEMORY:-4096m}"
+      # Mods= and WorkshopItems= are edited in the .ini. Without this the image rewrites both from
+      # MOD_IDS/WORKSHOP_IDS at every start and clears them when those are empty.
+      SELF_MANAGED_MODS: "true"
+    ports:
+      - "${ZOMBOID_PORT:-16261}:${ZOMBOID_PORT:-16261}/udp"
+      - "${ZOMBOID_UDP_PORT:-16262}:${ZOMBOID_UDP_PORT:-16262}/udp"
+      # RCON (27015/tcp) is deliberately not published.
+    volumes:
+      # Server/ (.ini, sandbox, spawn regions), Saves/ (worlds), db/ (accounts), Logs/.
+      - ./data/zomboid:/home/steam/Zomboid
+      # Steam Workshop downloads; re-downloaded from the WorkshopItems list when missing.
+      - ./data/workshop:/home/steam/pz-dedicated/steamapps/workshop
+
+  # One-shot RCON client on the block's network: docker compose run --rm rcon players
+  rcon:
+    image: itzg/rcon-cli:${RCON_CLI_TAG:-1.7.7}
+    profiles: ["tools"]
+    environment:
+      RCON_HOST: zomboid
+      # Must match RCONPort= in the .ini; the image does not set that key.
+      RCON_PORT: "${ZOMBOID_RCON_PORT:-27015}"
+      RCON_PASSWORD: "${ZOMBOID_RCON_PASSWORD:?set ZOMBOID_RCON_PASSWORD in .env}"
