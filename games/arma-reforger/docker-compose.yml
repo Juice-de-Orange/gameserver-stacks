@@ -1,0 +1,56 @@
+# Arma Reforger dedicated server, image ghcr.io/acemod/arma-reforger (source: acemod/docker-reforger).
+# The image installs or updates the game through SteamCMD on every container start, so the tag
+# below pins the wrapper, not the game version. See README.md.
+services:
+  reforger:
+    image: ghcr.io/acemod/arma-reforger:${REFORGER_TAG:-sha-d042142}
+    # The image is published for amd64 only.
+    platform: linux/amd64
+    restart: unless-stopped
+    # Docker sends SIGINT (the image's STOPSIGNAL); the launcher forwards it and the server writes
+    # its session save before exiting. The grace period is reserve for that write: a kill in the
+    # middle of it leaves a torn save.
+    stop_grace_period: 90s
+    ports:
+      # The server registers its public port with the Bohemia backend, so host and container
+      # port must be the same number.
+      - "${REFORGER_PORT:-2001}:${REFORGER_PORT:-2001}/udp"
+      - "${REFORGER_A2S_PORT:-17777}:${REFORGER_A2S_PORT:-17777}/udp"
+      # RCON (19999/udp) is deliberately not published. It is reachable only from containers on
+      # this block's default network.
+    environment:
+      # docker_generated: the image rebuilds Configs/docker_generated.json from the variables
+      # below on every start. Any other value is a file name in data/config/, used verbatim.
+      ARMA_CONFIG: ${REFORGER_CONFIG:-docker_generated}
+      ARMA_MAX_FPS: ${REFORGER_MAX_FPS:-120}
+      ARMA_PARAMS: ${REFORGER_PARAMS:-}
+      SERVER_BIND_PORT: ${REFORGER_PORT:-2001}
+      SERVER_PUBLIC_PORT: ${REFORGER_PORT:-2001}
+      SERVER_PUBLIC_ADDRESS: ${REFORGER_PUBLIC_ADDRESS:-}
+      SERVER_A2S_ADDRESS: 0.0.0.0
+      SERVER_A2S_PORT: ${REFORGER_A2S_PORT:-17777}
+      # RCON binds to all interfaces inside the container so that other containers on the
+      # network can reach it; the port itself is never published to the host.
+      RCON_ADDRESS: 0.0.0.0
+      RCON_PORT: 19999
+      RCON_PASSWORD: "${REFORGER_RCON_PASSWORD:?set REFORGER_RCON_PASSWORD in .env}"
+      RCON_PERMISSION: admin
+      GAME_NAME: ${REFORGER_SERVER_NAME:-My Arma Reforger Server}
+      GAME_PASSWORD: ${REFORGER_GAME_PASSWORD:-}
+      # Without a value the image invents a passphrase and prints it to the log; require one instead.
+      GAME_PASSWORD_ADMIN: "${REFORGER_ADMIN_PASSWORD:?set REFORGER_ADMIN_PASSWORD in .env}"
+      GAME_ADMINS: ${REFORGER_ADMINS:-}
+      # Empty keeps the image default (Conflict - Everon). Not a compose default because the
+      # scenario ID contains braces, which compose interpolation cannot carry in a default.
+      GAME_SCENARIO_ID: ${REFORGER_SCENARIO_ID:-}
+      GAME_MAX_PLAYERS: ${REFORGER_MAX_PLAYERS:-32}
+      GAME_VISIBLE: ${REFORGER_VISIBLE:-true}
+      GAME_CROSS_PLATFORM: ${REFORGER_CROSS_PLATFORM:-false}
+      GAME_SUPPORTED_PLATFORMS: ${REFORGER_SUPPORTED_PLATFORMS:-PLATFORM_PC}
+      GAME_MODS_IDS_LIST: ${REFORGER_MODS:-}
+    volumes:
+      - ./data/config:/reforger/Configs
+      # Session saves, the persistence database and server logs.
+      - ./data/profile:/home/profile
+      # Workshop mods downloaded by the server; kept so a restart does not fetch them again.
+      - ./data/workshop:/reforger/workshop

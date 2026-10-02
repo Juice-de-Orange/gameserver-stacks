@@ -1,0 +1,41 @@
+{
+	"bindAddress": "0.0.0.0",
+	"bindPort": 2001,
+	"publicAddress": "",
+	"publicPort": 2001,
+	"a2s": {
+		"address": "0.0.0.0",
+		"port": 17777
+	},
+	"rcon": {
+		"address": "0.0.0.0",
+		"port": 19999,
+		"password": "REPLACE WITH RCON PASSWORD",
+		"permission": "admin"
+	},
+	"game": {
+		"name": "My Arma Reforger Server",
+		"password": "",
+		"passwordAdmin": "REPLACE WITH ADMIN PASSWORD",
+		"admins": [],
+		"scenarioId": "{ECC61978EDCC2B5A}Missions/23_Campaign.conf",
+		"maxPlayers": 32,
+		"visible": true,
+		"crossPlatform": false,
+		"supportedPlatforms": [
+			"PLATFORM_PC"
+		],
+		"gameProperties": {
+			"serverMaxViewDistance": 1600,
+			"serverMinGrassDistance": 0,
+			"networkViewDistance": 1500,
+			"disableThirdPerson": false,
+			"fastValidation": true,
+			"battlEye": true,
+			"VONDisableUI": false,
+			"VONDisableDirectSpeechUI": false,
+			"VONCanTransmitCrossFaction": false
+		},
+		"mods": []
+	}
+}

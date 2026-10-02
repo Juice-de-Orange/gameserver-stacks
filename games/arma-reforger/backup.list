@@ -1,0 +1,8 @@
+# Stop -> tar these paths -> start. The server writes its session save when it receives the stop
+# signal, so a copy taken while it is stopped is consistent.
+# Session saves (hidden .db and .save entries under data/profile/profile/) and server logs.
+data/profile
+# The generated config, or your own config.json if REFORGER_CONFIG points at one.
+data/config
+# data/workshop is left out on purpose: the server downloads the mods listed in its config again
+# at start. Add it if you want the downloaded mod files in the archive as well.
