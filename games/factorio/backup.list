@@ -1,0 +1,6 @@
+# Stop → tar these paths → start. Factorio saves the map on SIGTERM (stop_grace_period 120s).
+# Mods belong to the world: keep them together with the saves they were played with.
+# config/ holds rconpw and server-settings.json (factorio.com token) — store archives privately.
+data/saves
+data/config
+data/mods

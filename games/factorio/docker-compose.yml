@@ -1,0 +1,66 @@
+# Factorio headless server — see README.md in this directory.
+services:
+  factorio:
+    # The tag is the game version, and clients must run exactly that version. The -rootless
+    # variant is appended here on purpose: it runs the server as UID 1000 and as PID 1, so
+    # SIGTERM reaches Factorio directly (see README, "Why the rootless variant").
+    image: factoriotools/factorio:${FACTORIO_TAG:-2.0.77}-rootless
+    restart: unless-stopped
+    # Factorio writes the whole map to a zip on SIGTERM. A grown factory takes longer than
+    # Docker's default 10 s, and a kill mid-save leaves only a *.tmp.zip that is discarded.
+    stop_grace_period: 120s
+    # Two steps before the image's own entrypoint:
+    # - rconpw is the only place the image reads the RCON password from. Writing it from .env
+    #   on every start keeps the server and the rcon tools service on the same password.
+    # - The image's first-start copy of server-settings.example.json has visibility.public=true,
+    #   which needs factorio.com credentials; without them the server does not start. The
+    #   block creates the file once with public=false instead and never touches it again.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        umask 077
+        mkdir -p /factorio/config
+        printf '%s\n' "$$FACTORIO_RCON_PASSWORD" > /factorio/config/rconpw
+        if [ ! -f /factorio/config/server-settings.json ]; then
+          jq '.visibility.public = false' /opt/factorio/data/server-settings.example.json \
+            > /factorio/config/server-settings.json.tmp
+          mv /factorio/config/server-settings.json.tmp /factorio/config/server-settings.json
+        fi
+        umask 022
+        exec /docker-entrypoint.sh
+    environment:
+      FACTORIO_RCON_PASSWORD: "${FACTORIO_RCON_PASSWORD:?set FACTORIO_RCON_PASSWORD in .env}"
+      # Factorio announces its own port to the matching server, so host and container port
+      # must be the same number.
+      PORT: ${FACTORIO_PORT:-34197}
+      RCON_PORT: "27015"
+      LOAD_LATEST_SAVE: ${FACTORIO_LOAD_LATEST_SAVE:-true}
+      GENERATE_NEW_SAVE: ${FACTORIO_GENERATE_NEW_SAVE:-false}
+      SAVE_NAME: ${FACTORIO_SAVE_NAME:-world}
+      DLC_SPACE_AGE: ${FACTORIO_DLC_SPACE_AGE:-true}
+      # Off by default: an update at start changes the mod set without anyone looking, and
+      # clients with the old set can no longer join.
+      UPDATE_MODS_ON_START: ${FACTORIO_UPDATE_MODS_ON_START:-false}
+    ports:
+      - "${FACTORIO_PORT:-34197}:${FACTORIO_PORT:-34197}/udp"
+    volumes:
+      - ./data:/factorio
+    # The image's own RCON client reads config/rconpw; it only succeeds once the map is loaded
+    # and the server accepts RCON logins.
+    healthcheck:
+      test: ["CMD", "rcon", "/players", "count"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
+  # One-shot RCON client: `docker compose run --rm rcon <command>`.
+  rcon:
+    image: itzg/rcon-cli:${RCON_CLI_TAG:-1.7.7}
+    profiles: ["tools"]
+    environment:
+      RCON_HOST: factorio
+      RCON_PORT: "27015"
+      RCON_PASSWORD: "${FACTORIO_RCON_PASSWORD:?set FACTORIO_RCON_PASSWORD in .env}"
