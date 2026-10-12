@@ -1,0 +1,4 @@
+# Development and test dependencies (not needed at runtime).
+pytest>=8
+# Lint. Pinned so that "green" means the same on every machine. Rules: ruff.toml.
+ruff==0.15.20

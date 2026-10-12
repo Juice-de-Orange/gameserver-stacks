@@ -1,0 +1,16 @@
+fastapi==0.142.2
+# Pinned although it is only a dependency of FastAPI (which sets no upper bound): the
+# advisories that forced this upgrade were in Starlette, so its version must be reproducible.
+starlette==1.7.0
+uvicorn[standard]==0.34.0
+sqlmodel==0.0.22
+psycopg[binary]==3.2.3
+pydantic-settings==2.7.0
+argon2-cffi==23.1.0
+# Fernet encryption of the game-server secrets entered in the UI (services/secrets.py).
+cryptography==50.0.2
+pyjwt==2.15.1
+python-multipart==0.0.32
+httpx==0.28.1
+apscheduler==3.11.0
+berconpy>=3,<4         # Arma Reforger: modified BattlEye RCON (services/bercon.py); v3 speaks Reforger

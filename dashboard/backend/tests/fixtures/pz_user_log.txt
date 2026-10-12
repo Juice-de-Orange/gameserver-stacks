@@ -1,0 +1,147 @@
+[23-07-26 09:18:56.096] Connection add index=0 guid=445857474821110188 id=null.
+[23-07-26 09:18:57.711] 76561198000000000 "Player One" attempting to join.
+[23-07-26 09:18:57.713] 76561198000000000 "Player One" allowed to join.
+[23-07-26 09:19:12.822] 76561198000000000 "Player One" attempting to join used queue.
+[23-07-26 09:20:58.375] player Player One loading time was: 99437 ms.
+[23-07-26 09:21:06.074] 76561198000000000 "Player One" fully connected (11910,6814,0).
+[23-07-26 09:21:19.092] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[23-07-26 09:21:24.087] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=2/4 action=Kick.
+[23-07-26 09:21:26.089] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=1/4 action=Kick.
+[23-07-26 09:21:29.088] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=2/4 action=Kick.
+[23-07-26 09:21:31.951] Connection disconnect index=0 guid=445857474821110188 id=76561198000000000.
+[23-07-26 09:21:31.954] Connection remove index=0 guid=445857474821110188 id=76561198000000000.
+[23-07-26 09:21:31.985] 76561198000000000 "Player One" disconnected player (11910,6815,0).
+[23-07-26 09:23:03.809] Connection add index=0 guid=351281883012049722 id=null.
+[23-07-26 09:23:05.425] 76561198000000000 "Player One" attempting to join.
+[23-07-26 09:23:05.425] 76561198000000000 "Player One" allowed to join.
+[23-07-26 09:23:16.878] 76561198000000000 "Player One" attempting to join used queue.
+[23-07-26 09:24:06.825] player Player One loading time was: 49259 ms.
+[23-07-26 09:24:11.388] 76561198000000000 "Player One" fully connected (11910,6815,0).
+[23-07-26 09:26:44.440] user Player One died at (11910,6951,0) (non pvp).
+[23-07-26 09:28:08.213] 76561198000000000 "Player One" disconnected player (11910,6951,0).
+[23-07-26 09:28:08.431] 76561198000000000 "Player One" fully connected (660,9657,0).
+[23-07-26 09:31:47.863] user Player One died at (695,9677,0) (non pvp).
+[23-07-26 09:36:33.199] Connection add index=1 guid=405323995069359470 id=null.
+[23-07-26 09:36:34.938] 76561198000000001 "PlayerTwo" attempting to join.
+[23-07-26 09:36:34.939] 76561198000000001 "PlayerTwo" allowed to join.
+[23-07-26 09:36:44.103] 76561198000000001 "PlayerTwo" attempting to join used queue.
+[23-07-26 09:37:25.847] player PlayerTwo loading time was: 39284 ms.
+[23-07-26 09:37:28.376] 76561198000000001 "PlayerTwo" fully connected (1545,14476,0).
+[23-07-26 09:37:33.397] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[23-07-26 09:37:38.399] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=2/4 action=Kick.
+[23-07-26 09:37:43.396] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=3/4 action=Kick.
+[23-07-26 09:39:03.195] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=2/4 action=Kick.
+[23-07-26 09:41:33.205] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=1/4 action=Kick.
+[23-07-26 09:44:03.228] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=0/4 action=Kick.
+[23-07-26 09:59:39.774] Connection disconnect index=0 guid=351281883012049722 id=76561198000000000.
+[23-07-26 09:59:39.779] Connection remove index=0 guid=351281883012049722 id=76561198000000000.
+[23-07-26 09:59:39.793] 76561198000000000 "Player One" disconnected player (695,9678,0).
+[23-07-26 10:23:45.436] Connection add index=0 guid=986289434142479948 id=null.
+[23-07-26 10:23:46.988] 76561198000000000 "Player One" attempting to join.
+[23-07-26 10:23:46.989] 76561198000000000 "Player One" allowed to join.
+[23-07-26 10:25:55.024] 76561198000000000 "Player One" attempting to join used queue.
+[23-07-26 10:26:44.392] player Player One loading time was: 48649 ms.
+[23-07-26 10:27:19.990] 76561198000000000 "Player One" fully connected (2420,14277,0).
+[23-07-26 11:32:08.652] Connection disconnect index=1 guid=405323995069359470 id=76561198000000001.
+[23-07-26 11:32:08.656] Connection remove index=1 guid=405323995069359470 id=76561198000000001.
+[23-07-26 11:32:08.671] 76561198000000001 "PlayerTwo" disconnected player (1545,14479,0).
+[23-07-26 11:54:06.609] Connection add index=1 guid=405323995069359470 id=null.
+[23-07-26 11:54:08.414] 76561198000000001 "PlayerTwo" attempting to join.
+[23-07-26 11:54:08.421] 76561198000000001 "PlayerTwo" allowed to join.
+[23-07-26 11:54:15.166] 76561198000000001 "PlayerTwo" attempting to join used queue.
+[23-07-26 11:54:43.731] player PlayerTwo loading time was: 28170 ms.
+[23-07-26 11:54:49.296] 76561198000000001 "PlayerTwo" fully connected (1545,14479,0).
+[23-07-26 11:54:54.335] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[23-07-26 11:56:36.636] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=0/4 action=Kick.
+[23-07-26 13:25:25.184] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[23-07-26 13:25:30.181] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=2/4 action=Kick.
+[23-07-26 13:25:30.254] Connection disconnect index=1 guid=405323995069359470 id=76561198000000001.
+[23-07-26 13:25:30.256] Connection remove index=1 guid=405323995069359470 id=76561198000000001.
+[23-07-26 13:25:30.271] 76561198000000001 "PlayerTwo" disconnected player (1848,14852,0).
+[23-07-26 13:26:14.598] Connection add index=1 guid=405323995069359470 id=null.
+[23-07-26 13:26:16.439] 76561198000000001 "PlayerTwo" attempting to join.
+[23-07-26 13:26:16.440] 76561198000000001 "PlayerTwo" allowed to join.
+[23-07-26 13:26:23.308] 76561198000000001 "PlayerTwo" attempting to join used queue.
+[23-07-26 13:26:51.719] player PlayerTwo loading time was: 28021 ms.
+[23-07-26 13:26:54.467] 76561198000000001 "PlayerTwo" fully connected (1848,14852,0).
+[23-07-26 13:26:59.544] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[23-07-26 13:27:04.545] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=2/4 action=Kick.
+[23-07-26 13:28:44.644] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=1/4 action=Kick.
+[23-07-26 13:31:14.645] Warning: player="PlayerTwo" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=0/4 action=Kick.
+[23-07-26 13:38:59.845] Connection disconnect index=1 guid=405323995069359470 id=76561198000000001.
+[23-07-26 13:38:59.847] Connection remove index=1 guid=405323995069359470 id=76561198000000001.
+[23-07-26 13:38:59.859] 76561198000000001 "PlayerTwo" disconnected player (1544,14477,0).
+[23-07-26 15:08:30.129] Connection disconnect index=0 guid=986289434142479948 id=76561198000000000.
+[23-07-26 15:08:30.130] Connection remove index=0 guid=986289434142479948 id=76561198000000000.
+[23-07-26 15:08:30.145] 76561198000000000 "Player One" disconnected player (1875,8098,0).
+[17-06-26 19:29:46.119] Connection add index=0 guid=1148418343306485405 id=null.
+[17-06-26 19:29:47.962] 76561198000000002 "Player Three" attempting to join.
+[17-06-26 19:29:47.963] 76561198000000002 "Player Three" allowed to join.
+[17-06-26 19:33:16.299] Connection disconnect index=0 guid=1148418343306485405 id=76561198000000002.
+[17-06-26 19:33:16.299] Connection remove index=0 guid=1148418343306485405 id=76561198000000002.
+[17-06-26 19:34:15.490] Connection add index=0 guid=1148418343306485405 id=null.
+[17-06-26 19:34:17.324] 76561198000000002 "Player Three" attempting to join.
+[17-06-26 19:34:17.324] 76561198000000002 "Player Three" allowed to join.
+[17-06-26 19:40:42.960] 76561198000000002 "Player Three" attempting to join used queue.
+[17-06-26 19:41:07.408] player Player Three loading time was: 23283 ms.
+[17-06-26 19:41:19.668] 76561198000000002 "Player Three" fully connected (6715,5331,0).
+[17-06-26 19:42:49.240] user Player Three died at (6714,5323,1) (non pvp).
+[17-06-26 19:43:13.195] Connection disconnect index=0 guid=1148418343306485405 id=76561198000000002.
+[17-06-26 19:43:13.195] Connection remove index=0 guid=1148418343306485405 id=76561198000000002.
+[17-06-26 19:43:13.209] 76561198000000002 "Player Three" disconnected player (6714,5323,1).
+[17-06-26 20:11:54.927] Connection add index=0 guid=1058346353925793390 id=null.
+[17-06-26 20:11:56.623] 76561198000000002 "Player Three" attempting to join.
+[17-06-26 20:11:56.624] access denied: user "Player Three" reason "InvalidUsernamePassword".
+[17-06-26 20:11:56.625] Connection disconnect index=0 guid=1058346353925793390 id=76561198000000002.
+[17-06-26 20:11:56.627] Connection remove index=0 guid=1058346353925793390 id=76561198000000002.
+[17-06-26 20:12:20.066] Connection add index=0 guid=1058346353925793390 id=null.
+[17-06-26 20:12:21.748] 76561198000000002 "Player Three" attempting to join.
+[17-06-26 20:12:21.750] 76561198000000002 "Player Three" allowed to join.
+[17-06-26 20:12:45.123] Connection disconnect index=0 guid=1058346353925793390 id=76561198000000002.
+[17-06-26 20:12:45.127] Connection remove index=0 guid=1058346353925793390 id=76561198000000002.
+[17-06-26 20:16:15.520] Connection add index=0 guid=153124562431751591 id=null.
+[17-06-26 20:16:17.293] 76561198000000000 "Player One" attempting to join.
+[17-06-26 20:16:17.294] 76561198000000000 "Player One" allowed to join.
+[17-06-26 20:21:05.093] 76561198000000000 "Player One" attempting to join used queue.
+[17-06-26 20:23:01.574] player Player One loading time was: 110775 ms.
+[17-06-26 20:23:05.936] 76561198000000000 "Player One" fully connected (6057,5349,0).
+[17-06-26 20:23:14.192] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[17-06-26 20:23:19.191] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=2/4 action=Kick.
+[17-06-26 20:23:45.589] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=1/4 action=Kick.
+[17-06-26 20:26:15.598] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=null counter=0/4 action=Kick.
+[17-06-26 20:43:26.701] Connection add index=1 guid=756604780591564700 id=null.
+[17-06-26 20:43:28.444] 76561198000000001 "Player Two" attempting to join.
+[17-06-26 20:43:28.444] 76561198000000001 "Player Two" allowed to join.
+[17-06-26 20:47:34.989] 76561198000000001 "Player Two" attempting to join used queue.
+[17-06-26 20:48:07.185] player Player Two loading time was: 29941 ms.
+[17-06-26 20:48:11.564] 76561198000000001 "Player Two" fully connected (6266,5328,0).
+[17-06-26 21:29:41.153] user Bob died at (4427,10351,0) (non pvp).
+[17-06-26 21:44:21.766] user Player Two died at (3594,10923,0) (non pvp).
+[17-06-26 21:45:29.672] Connection disconnect index=1 guid=756604780591564700 id=76561198000000001.
+[17-06-26 21:45:29.676] Connection remove index=1 guid=756604780591564700 id=76561198000000001.
+[17-06-26 21:45:29.689] 76561198000000001 "Player Two" disconnected player (3594,10923,0).
+[17-06-26 22:06:36.921] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[17-06-26 22:06:41.898] Connection disconnect index=0 guid=153124562431751591 id=76561198000000000.
+[17-06-26 22:06:41.901] Connection remove index=0 guid=153124562431751591 id=76561198000000000.
+[17-06-26 22:06:41.913] 76561198000000000 "Player One" disconnected player (3275,10758,0).
+[18-06-26 06:53:24.112] Connection add index=0 guid=76561198000000003 id=null.
+[18-06-26 06:53:25.695] 76561198000000000 "Player One" attempting to join.
+[18-06-26 06:53:25.696] 76561198000000000 "Player One" allowed to join.
+[18-06-26 06:53:38.642] 76561198000000000 "Player One" attempting to join used queue.
+[18-06-26 06:55:14.036] player Player One loading time was: 89711 ms.
+[18-06-26 06:55:17.231] 76561198000000000 "Player One" fully connected (3275,10758,0).
+[18-06-26 08:04:29.644] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[18-06-26 08:04:34.552] Connection disconnect index=0 guid=76561198000000003 id=76561198000000000.
+[18-06-26 08:04:34.555] Connection remove index=0 guid=76561198000000003 id=76561198000000000.
+[18-06-26 08:04:34.577] 76561198000000000 "Player One" disconnected player (2868,10399,0).
+[18-06-26 08:28:43.038] Connection add index=0 guid=2219204592540 id=null.
+[18-06-26 08:28:44.697] 76561198000000000 "Player One" attempting to join.
+[18-06-26 08:28:44.698] 76561198000000000 "Player One" allowed to join.
+[18-06-26 08:28:57.247] 76561198000000000 "Player One" attempting to join used queue.
+[18-06-26 08:29:17.451] player Player One loading time was: 19527 ms.
+[18-06-26 08:29:27.679] 76561198000000000 "Player One" fully connected (2868,10399,0).
+[18-06-26 09:01:00.665] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=1/4 action=Kick.
+[18-06-26 09:01:05.662] Warning: player="Player One" server-option=AntiCheatPlayer anti-cheat=PlayerUpdate reason=PlayerUpdate counter=2/4 action=Kick.
+[18-06-26 09:01:06.019] Connection disconnect index=0 guid=2219204592540 id=76561198000000000.
+[18-06-26 09:01:06.023] Connection remove index=0 guid=2219204592540 id=76561198000000000.
+[18-06-26 09:01:06.034] 76561198000000000 "Player One" disconnected player (3372,9682,0).

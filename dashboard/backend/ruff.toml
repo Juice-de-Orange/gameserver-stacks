@@ -1,0 +1,40 @@
+# Lint configuration for the backend.
+#
+# Why it exists: `F821` (undefined name) catches the "used a module without importing it" class of
+# bug that only fails at request time and that a route-registration smoke test does not see.
+
+line-length = 110
+target-version = "py312"
+
+exclude = [".venv-test", "__pycache__", ".pytest_cache", ".ruff_cache"]
+
+[lint]
+select = [
+    "E",      # pycodestyle
+    "F",      # pyflakes — includes F821 (undefined name) and F401 (unused import)
+    "W",      # warnings
+    "I",      # import sorting
+    "B",      # bugbear — common pitfalls
+    "UP",     # pyupgrade
+    # ONE targeted rule instead of the whole PERF family: `for _k, v in d.items()` flags a key
+    # as unused. That pattern has hidden real bugs where the loop body did not mean `_wid` but a
+    # variable of the same name from an earlier loop. `B007` does not catch it: the underscore
+    # convention `_wid` matches `dummy-variable-rgx` and disarms that rule.
+    # The rest of PERF stays out — PERF401 wants to squeeze `Finding(...)` loops into
+    # comprehensions, which trades readability for cleverness.
+    "PERF102",
+]
+ignore = [
+    "E501",   # line length: line-length above is the rule, the odd long comment is fine
+    "B008",   # `Depends(...)` as a default is exactly the intended FastAPI idiom
+    # --- deliberately off for now so the gate is green instead of "known red" ---
+    # Both are pure modernisation without a bug behind them and would touch ~60 files in one go.
+    # To be enabled in a dedicated clean-up step, not in passing.
+    "B904",   # `raise … from err` in except blocks
+    "UP",     # pyupgrade (datetime.UTC, StrEnum, …)
+    "I001",   # import sorting
+]
+
+[lint.per-file-ignores]
+# Tests may keep unused imports for fixtures/side effects.
+"tests/*" = ["F401"]

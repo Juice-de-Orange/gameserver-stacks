@@ -1,0 +1,23 @@
+# Minecraft console log (stdout → `docker logs`) as it REALLY looks.
+#
+# The first lines are verbatim from `docker logs`; the player lines are reproduced in the SAME
+# format, because the captured log contained no player events.
+#
+# The point of this fixture: the prefix is `[HH:MM:SS INFO]:` — NOT `[HH:MM:SS] [Server
+# thread/INFO]:`. The latter is what `logs/latest.log` contains, not stdout, and stdout is what
+# the driver reads.
+#
+# Lines without '#' are test data.
+[20:36:01 INFO]: [ServerCtrl] was coded by blitzdose
+[20:36:53 INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[20:36:53 INFO]: [ChunkHolderManager] Halted chunk system for world 'world'
+[20:36:53 INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[19:02:11 INFO]: Steve joined the game
+[19:03:40 INFO]: <Steve> hello folks
+[19:04:02 INFO]: <Steve> Friend2 joined the game
+[19:04:20 INFO]: <Steve> Friend2 was slain by Zombie
+[19:04:31 INFO]: <Steve> Friend2 left the game
+[19:05:12 INFO]: [Server] [Project Zomboid] Bob: Steve was slain by Zombie
+[19:05:40 INFO]: [Server] [Project Zomboid] Bob: Friend3 joined the game
+[19:07:02 INFO]: Steve was slain by Zombie
+[19:08:30 INFO]: Steve left the game

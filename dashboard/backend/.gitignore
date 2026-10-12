@@ -1,0 +1,7 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Lokale Wegwerf-venv für Tests (nie committen)
+.venv-test/

@@ -1,0 +1,73 @@
+# Avorion's command list — from a RUNNING server (Avorion 2.5.13, 0417ab29738c), via `/help` over RCON.
+#
+# **Why this list and not `admin.xml`:** admin.xml is the permission management, not the command
+# set — and the two disagree. It names `factionstats`, which the server answers with "Unknown
+# command"; it lacks `/admin`, `/stop` and `/workers`, which do exist. Even a file the server
+# writes ITSELF is no substitute for asking the server.
+#
+# **And why evidence at all:** of twelve commands that hosting wikis list for Avorion, seven do not
+# exist — /tp, /maxplayers, /password, /pvp, /sector, /regeneratesector, /clearsector.
+# (`/teleport` exists, `/tp` does not.)
+#
+# Limit, stated honestly: `/help` proves the NAME and the intent, not the argument form.
+# Measured argument forms are listed below.
+
+/addcrew: Sets the current crew of a ship to the minimum required crew
+/admin: Add/remove administrators
+/ban: Ban a player from the server
+/banip: Ban a player's ip from the server
+/behemoths: Enable/disable the Behemoths Event Series
+/benchmark: Records performance stats for some time and saves it to a file.
+/blacklist: Restrict access via Blacklist
+/colldamage: Set game/server collision damage
+/destroy: Destroys your current target or the object with the given id
+/devmode: Toggle server dev-mode
+/difficulty: Set game/server difficulty
+/echo: Echoes all given parameters to console
+/give: Gives resources/money to a player
+/ground: Block a player from using hyperspace
+/groups: Manages users of groups
+/help: Lists commands and provides help on commands
+/invite: Invite players to join your group
+/join: Confirm an invitation to a group or join an existing one
+/kick: Kick a player from the server
+/knowledge: Gives building knowledge to a player or resets it.
+/leader: Promote another player to be the leader of the group
+/leave: Leave your current group
+/mute: Mute a player
+/pause: Pauses the server
+/playerinfo: Print players and their details
+/players: List all online players
+/profile: Records performance stats for some time and saves it to a file.
+/run: Run a lua script command
+/save: Save the current state of the server; Write all data to disk
+/say: Send chat message to all players on the server
+/seed: Display the seed of the server
+/selfinfo: Prints administrative information about yourself
+/status: Display status data of the server
+/stop: Stops the server
+/suicide: Destroys your current ship
+/teleport: Teleports a player
+/teleporttoship: Teleport to a sector with a ship you own
+/trade: Initiate trading with another player
+/unban: Unban a player from the server
+/unbanip: Unban an ip from the server
+/unground: Re-enable hyperspace for a player
+/unmute: Unmute a player
+/version: Retrieve the version of the server
+/w: Send a private message to a player
+/whisper: Send a private message to a player
+/whitelist: Restrict access via Whitelist
+/workers: Set the amount of worker threads on the server
+
+# --- Argument forms, measured one by one ------------------------------------------------
+# /whitelist -s                -> "Whitelist is not active"
+# /groups -l                   -> "## Groups: ##  Moderators"
+# /save                        -> "Saving all server data."
+# /say <text>                  -> ""            (appears in the game chat, not in the console)
+# /status                      -> "0 players online, in 0 sectors ..." plus performance data
+# /players                     -> "online players (0):"
+# /version                     -> "Server Version: 2.5.13 0417ab29738c"
+# /seed                        -> "0"           (NOT the galaxy seed from server.ini)
+# /playerinfo <name>           -> ""            (cannot be verified further without players)
+# /factionstats                -> "Unknown command" — listed in admin.xml, but does not exist

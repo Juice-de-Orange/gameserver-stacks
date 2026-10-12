@@ -1,0 +1,50 @@
+# Factorio console — measured on a RUNNING server (Factorio 2.0.77, over RCON).
+# Format: <command>  ->  <server response>
+#
+# Why this file exists: the action catalog is checked against it. An entry whose verb is not
+# listed here is not measured — and a button that reaches into nothing is worse than a missing
+# button. The responses are included because some of them are the reason for a note in the
+# catalog (`/promote` answers with NOTHING, even on success).
+
+/help                                 -> "- Server console commands.\n/quit - Terminates the server cleanly.\n/save <name> - Saves the current game with the specified name."
+/players online                       -> "Players (0):"
+/admins                               -> ""
+/version                              -> "2.0.77"
+/seed                                 -> "1026121180"
+/time                                 -> "1 second"
+/bans                                 -> "The banlist is empty."
+/mutes                                -> ""
+/whitelist get                        -> "The whitelist is empty."
+/evolution                            -> "Nauvis - Evolution factor: 0.0000. (Time 100%) (Pollution 0%) (Spawner kills 0%)"
+/promote <name>                       -> ""            # EMPTY even on success
+/demote <name>                        -> ""            # EMPTY even on success
+/mute <name>                          -> "Player ... doesn't exist."
+/unmute <name>                        -> "Player ... doesn't exist."
+/purge <name>                         -> "Player ... doesn't exist."
+/kick <name> <reason>                  -> "Player ... doesn't exist."
+/ban <name> <reason>                   -> "Added ... to the banlist."      # also works pre-emptively
+/unban <name>                         -> "Unbanned ..."
+/whitelist add <name>                 -> "Added ... to the whitelist."
+/whitelist remove <name>              -> "Removed ... from the whitelist."
+/shout <text>                         -> ""            # appears in the game chat, not here
+/server-save                          -> "Saving the map"
+/silent-command <lua>                 -> "<return value>" # measured: rcon.print(game.tick) -> 92
+/c <lua>                              -> "<return value>" # as above, also writes to the chat
+/doesnotexist                         -> "Unknown command \"doesnotexist\". Type /h or /help for more help about commands."
+
+# `/config get <option>` — the twelve options the server answered:
+/config get afk-auto-kick                              -> "AFK auto-kick is disabled."
+/config get allow-commands                             -> "Allow Lua commands: Admins only."
+/config get autosave-interval                          -> "Autosave every 10 minutes."
+/config get autosave-only-on-server                    -> "Autosave only on server: true."
+/config get ignore-player-limit-for-returning-players  -> "Ignore player limit for returning players: false."
+/config get max-players                                -> "12"
+/config get max-upload-speed                           -> "Unlimited."
+/config get only-admins-can-pause                      -> "Only admins can pause: true."
+/config get password                                   -> "The server currently has a password."
+/config get require-user-verification                  -> "Verify user identity: false."
+/config get visibility-lan                             -> "LAN visibility: true."
+/config get visibility-public                          -> "Public visibility: false."
+# NOT valid, although they are in server-settings.json:
+/config get game-password                              -> "Unknown config: game-password"
+/config get non-blocking-saving                        -> "Unknown config: non-blocking-saving"
