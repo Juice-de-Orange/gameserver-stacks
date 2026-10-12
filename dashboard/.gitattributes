@@ -1,0 +1,29 @@
+# Pin line endings.
+#
+# Everything that is executed or read inside a Linux container stays LF, whatever
+# `core.autocrlf` says on the machine that checked the tree out: a shell script delivered with
+# CRLF fails with "No such file or directory" (the kernel reads `#!/bin/sh\r` as the
+# interpreter path).
+
+*.sh        text eol=lf
+*.service   text eol=lf
+*.py        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.toml      text eol=lf
+*.ini       text eol=lf
+*.json      text eol=lf
+Dockerfile  text eol=lf
+Caddyfile   text eol=lf
+.env.example text eol=lf
+
+# Frontend sources and text files too, so that checksums of a deployed tree match the repository.
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.js        text eol=lf
+*.mjs       text eol=lf
+*.jsx       text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+*.md        text eol=lf
+*.txt       text eol=lf

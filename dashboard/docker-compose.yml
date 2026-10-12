@@ -1,0 +1,293 @@
+# Stacks Console — web dashboard for the game servers of gameserver-stacks.
+# Configuration and secrets come from ./.env (never committed; see .env.example).
+#
+# No service pins a `container_name`: the containers are called `<project>-<service>-1`, and
+# everything inside the stack reaches the others by SERVICE name (`console-api`, `console-db`, …),
+# which Docker resolves per compose project. So a second installation on the same host only
+# needs its own project name (`docker compose -p <name>` or COMPOSE_PROJECT_NAME), its own
+# DASHBOARD_PORT and its own GAME_NETWORK — see .env.example. From the host, address a service
+# with `docker compose exec <service> …` in this directory, not with `docker exec <name>`.
+#
+# Networks:
+#   console-internal (internal: true) -> console-db, console-backup, console-dockerproxy, console-api
+#                                        (no route to the outside)
+#   console-front                     -> console-web, console-api (Caddy -> API), and with the
+#                                        profile `https` console-tls (HTTPS front -> Caddy)
+#   gameserver-net   (created here)   -> console-api and every game server the dashboard creates
+#                                        (RCON stays inside this network)
+#   host network                      -> console-firewall only (profile `firewall`), reached by
+#                                        console-api over a Unix socket, not over a network
+# The first two are scoped to the compose project. gameserver-net has a fixed name
+# (GAME_NETWORK), so Caddy stays off it: on a game network that two installations share by
+# mistake, `console-api` would resolve to both APIs.
+name: stacks-console
+
+services:
+  # ---- Postgres (own, isolated database; NOT published on the host) ----
+  console-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-stacks}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-stacks}
+    volumes:
+      - ${DB_DATA_DIR:-./data/db}:/var/lib/postgresql/data
+    networks: [console-internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Optional: nightly dump of the dashboard database ----
+  #
+  # The weekly backup job of the dashboard saves game worlds only. This sidecar covers what
+  # cannot be rebuilt from the game files: audit log, player statistics and sessions,
+  # incidents, mod sets, schedules, users and roles. Remove the service if you back up the
+  # database another way.
+  #
+  # Same image as the database (`postgres:16-alpine`) so that `pg_dump` matches the server
+  # version — an older client refuses to dump a newer server.
+  console-backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/backup-loop.sh"]
+    environment:
+      PGHOST: console-db
+      PGUSER: ${POSTGRES_USER:-stacks}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      PGDATABASE: ${POSTGRES_DB:-stacks}
+      # Default 02:30 in the container, which runs without `TZ` — i.e. UTC, like the backend
+      # scheduler by default. Deliberately NOT 04:00: that is where the weekly world backup runs.
+      BACKUP_HOUR: ${DB_BACKUP_HOUR:-2}
+      BACKUP_MINUTE: ${DB_BACKUP_MINUTE:-30}
+      BACKUP_KEEP_DAYS: ${DB_BACKUP_KEEP_DAYS:-30}
+      # The script starts as root only to hand the dump directory to this uid:gid (Docker creates
+      # a missing bind-mount source owned by root), then writes every dump as it.
+      BACKUP_OWNER: ${DB_BACKUP_OWNER:-1000:1000}
+    volumes:
+      - ./ops/backup-loop.sh:/backup-loop.sh:ro
+      # The script only ever removes its own files (`stacks-console-*.sql.gz`); manual dumps
+      # you put next to them are left alone.
+      - ${DB_BACKUP_DIR:-./db-backups}:/backups
+    depends_on:
+      console-db:
+        condition: service_healthy
+    networks: [console-internal]
+
+  # ---- Docker socket proxy: the backend controls containers ONLY through this ----
+  # (read-only socket, minimal permissions, reachable from console-internal only)
+  console-dockerproxy:
+    image: tecnativa/docker-socket-proxy:v0.4.2
+    restart: unless-stopped
+    environment:
+      CONTAINERS: "1"       # GET /containers (state/stats/logs) + create/remove/rename/update (with POST)
+      POST: "1"             # allow write methods at all (otherwise the whole API is read-only)
+      INFO: "1"             # ping/version
+      # Granular lifecycle gates: from v0.4.x start/stop/restart are OFF by default — POST alone
+      # is not enough. Without these every start/stop/restart fails with 403.
+      ALLOW_START: "1"      # POST /containers/{id}/start
+      ALLOW_STOP: "1"       # POST /containers/{id}/stop
+      ALLOW_RESTARTS: "1"   # POST /containers/{id}/restart|stop|kill
+      # Images: needed for the version picker. For Project Zomboid the image tag IS the game
+      # version, so a change needs GET /images (is it local already?) and POST /images/create
+      # (pull). Without it every change to a new version fails with a bare "no such image".
+      # Deliberate trade-off: this allows all /images operations (including delete). It stays
+      # contained because the proxy is reachable from console-internal only and the API routes
+      # behind it require the `can_manage_versions` flag (admin-only by default).
+      IMAGES: "1"
+      # everything else stays 0: no NETWORKS/VOLUMES/EXEC/SECRETS/BUILD/...
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [console-internal]
+
+  # ---- Backend (FastAPI) ----
+  console-api:
+    # Prebuilt image (published on every release). `docker compose up -d` pulls it if it is not
+    # there yet and builds it from ./backend if the pull fails; `docker compose up -d --build`
+    # always builds it here and tags the result with the same name. GSS_VERSION pins a release
+    # (e.g. 0.2.0); default: latest. Update: `docker compose pull && docker compose up -d`.
+    image: ghcr.io/juice-de-orange/stacks-console-api:${GSS_VERSION:-latest}
+    build:
+      context: ./backend
+      args:
+        # The API runs as this uid; the directories under DATA_ROOT must be owned by it.
+        APP_UID: ${APP_UID:-1000}
+    restart: unless-stopped
+    env_file:
+      # `required: false` (Compose >= 2.24) only lets `docker compose config` run on a checkout
+      # without a .env. The stack still refuses to start without one: POSTGRES_PASSWORD is
+      # required above.
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_HOST: console-db
+      DOCKER_PROXY_URL: http://console-dockerproxy:2375
+      DATA_ROOT: ${DATA_ROOT:-/srv/gameservers}
+      GAME_NETWORK: ${GAME_NETWORK:-gameserver-net}
+      # Whose X-Forwarded-For the API believes: the bundled Caddy, by service name (Docker
+      # assigns its address). `-` instead of `:-`: an explicitly empty value trusts nobody.
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES-console-web}
+    volumes:
+      # Read/write access to every game server's data (config, saves, mods, backups).
+      # The SAME path on both sides is required: when the API creates a game container it
+      # passes these paths to the Docker API as HOST paths (backend/app/services/container_spec.py).
+      # A server whose data lives outside DATA_ROOT is invisible to the dashboard — its config
+      # then looks like "nothing set" rather than an error. More roots than this one:
+      # docker-compose.override.example.yml.
+      - ${DATA_ROOT:-/srv/gameservers}:${DATA_ROOT:-/srv/gameservers}
+      # Graceful stop/start record of `python -m app.cli stop-all | start-recorded`.
+      - api_data:/app/data
+      # The firewall helper's Unix socket (profile `firewall`; stays empty without it).
+      - firewall_socket:/run/console-firewall
+    depends_on:
+      console-db:
+        condition: service_healthy
+    # Healthy once the API answers, which is after its start-up migrations: `up -d --wait` (the
+    # systemd unit, the migration runbook) must not reach the CLI or the routes earlier.
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json, urllib.request; r = urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4); raise SystemExit(0 if json.load(r).get('db') else 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    networks: [console-internal, console-front, gameserver-net]
+
+  # ---- Reverse proxy (Caddy): serves the built frontend, proxies /api and /ws ----
+  console-web:
+    # Prebuilt like console-api; `--build` builds it locally instead.
+    image: ghcr.io/juice-de-orange/stacks-console-web:${GSS_VERSION:-latest}
+    build: ./frontend           # multi-stage: Node builds the Vite SPA -> Caddy serves it
+    restart: unless-stopped
+    environment:
+      # Whose X-Forwarded-For Caddy believes (see frontend/Caddyfile).
+      CADDY_TRUSTED_PROXIES: ${CADDY_TRUSTED_PROXIES:-private_ranges}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      # Local only by default. For HTTPS put your own TLS-terminating reverse proxy or tunnel in
+      # front of it, or switch on `console-tls` below. DASHBOARD_BIND changes the host address
+      # (an IPv6 address goes in brackets: [::1]).
+      - "${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-8080}:80"
+    depends_on: [console-api]
+    networks: [console-front]
+
+  # ---- Optional HTTPS front (compose profile `https`) ----
+  #
+  # Switched on by COMPOSE_PROFILES=https together with DASHBOARD_DOMAIN and ACME_EMAIL in the
+  # .env (see .env.example). A second Caddy that answers on ports 80 and 443 of every host
+  # interface, obtains and renews the certificate for DASHBOARD_DOMAIN by itself, redirects HTTP
+  # to HTTPS, sends HSTS and hands every request to console-web (frontend/Caddyfile.https).
+  # Without the profile this service does not exist and console-web above is the whole front.
+  #
+  # Why a profile and not console-web itself: Compose cannot publish a port depending on a
+  # variable, and the plain setup must not open 80/443. console-web stays exactly as it is
+  # (also in HTTPS mode, on its local port), and so does the trust chain: this Caddy believes no
+  # forwarded header, console-web believes it (private address), the API believes console-web.
+  console-tls:
+    image: caddy:2-alpine
+    profiles: [https]
+    restart: unless-stopped
+    environment:
+      DASHBOARD_DOMAIN: ${DASHBOARD_DOMAIN:-}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+      # `acme` (default): a public ACME CA. `internal`: Caddy's own CA, for testing only.
+      ACME_CA: ${ACME_CA:-acme}
+    # A missing setting stops the start with a sentence that names it (`docker compose logs
+    # console-tls`) rather than with a Caddyfile parse error.
+    command:
+      - /bin/sh
+      - -c
+      - |
+        if [ -z "$$DASHBOARD_DOMAIN" ]; then
+          echo "console-tls: DASHBOARD_DOMAIN is not set in .env - the profile https needs the dashboard's domain name." >&2
+          exit 1
+        fi
+        case "$$ACME_CA" in
+          acme) if [ -z "$$ACME_EMAIL" ]; then
+                  echo "console-tls: ACME_EMAIL is not set in .env - the certificate authority needs a contact address." >&2
+                  exit 1
+                fi ;;
+          internal) ;;
+          *) echo "console-tls: ACME_CA must be acme or internal, not '$$ACME_CA'." >&2
+             exit 1 ;;
+        esac
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    volumes:
+      - ./frontend/Caddyfile.https:/etc/caddy/Caddyfile:ro
+      # Certificates and the ACME account. Keep this volume: a fresh one requests a new
+      # certificate, and the CAs limit how often that may happen.
+      - tls_data:/data
+      - tls_config:/config
+    ports:
+      # 80: the CA's HTTP challenge and the redirect to HTTPS; 443: HTTPS (UDP: HTTP/3). The CA
+      # connects to ports 80/443 of DASHBOARD_DOMAIN, so other host ports only work if something
+      # forwards 80/443 to them.
+      - "${DASHBOARD_HTTP_PORT:-80}:80"
+      - "${DASHBOARD_HTTPS_PORT:-443}:443"
+      - "${DASHBOARD_HTTPS_PORT:-443}:443/udp"
+    depends_on: [console-web]
+    networks: [console-front]
+
+  # ---- Optional firewall helper (compose profile `firewall`) ----
+  #
+  # Switched on by adding `firewall` to COMPOSE_PROFILES and setting GSS_FIREWALL_TOKEN in the
+  # .env (see .env.example). Opens the published game ports of the enabled servers in Docker's
+  # DOCKER-USER chain through a chain of its own (GSS-ALLOW): ACCEPT rules only, and only after an
+  # admin applied the previewed change under Settings → Network. Trust boundary and limits:
+  # docs/security.md. Before switching the profile off again:
+  # `docker compose run --rm console-firewall remove` takes its rules out.
+  #
+  # It runs in the HOST's network namespace, because that is where Docker's rules are, with
+  # NET_ADMIN as its only capability: no Docker socket, no published or listening network port.
+  # The API reaches it over a Unix socket in the volume `firewall_socket` (a container in the
+  # host's network namespace cannot join console-internal), with GSS_FIREWALL_TOKEN.
+  console-firewall:
+    # Prebuilt like console-api; `--build` builds it locally instead.
+    image: ghcr.io/juice-de-orange/stacks-console-firewall:${GSS_VERSION:-latest}
+    build: ./firewall
+    profiles: [firewall]
+    restart: unless-stopped
+    network_mode: host
+    cap_drop: [ALL]
+    cap_add: [NET_ADMIN]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs:
+      # iptables-legacy writes its lock file here.
+      - /run
+    environment:
+      GSS_FIREWALL_TOKEN: ${GSS_FIREWALL_TOKEN:-}
+      GSS_FIREWALL_BACKEND: ${GSS_FIREWALL_BACKEND:-auto}
+      GSS_FIREWALL_PORT_RANGE: ${GSS_FIREWALL_PORT_RANGE:-1024-65535}
+      GSS_FIREWALL_RECONCILE_SECONDS: ${GSS_FIREWALL_RECONCILE_SECONDS:-60}
+    volumes:
+      - firewall_socket:/run/console-firewall
+      # The last applied state: restored at start (the rules do not survive a reboot) and every
+      # GSS_FIREWALL_RECONCILE_SECONDS.
+      - firewall_state:/var/lib/console-firewall
+
+networks:
+  # Created by this compose project. Game servers the dashboard creates join it by name. The
+  # name is NOT scoped to the project: a second installation on the same host needs its own
+  # GAME_NETWORK.
+  gameserver-net:
+    name: ${GAME_NETWORK:-gameserver-net}
+  console-internal:
+    internal: true
+  console-front:
+
+volumes:
+  api_data:
+  caddy_data:
+  caddy_config:
+  tls_data:
+  tls_config:
+  firewall_socket:
+  firewall_state:

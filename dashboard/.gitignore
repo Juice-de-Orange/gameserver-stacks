@@ -1,0 +1,14 @@
+# Secrets
+.env
+# Local compose overrides (see docker-compose.override.example.yml)
+docker-compose.override.yml
+
+# Build artefacts / runtime
+node_modules/
+frontend/dist/
+data/
+*.local
+__pycache__/
+*.pyc
+# Database dumps of the backup sidecar
+db-backups/

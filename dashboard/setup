@@ -1,0 +1,272 @@
+#!/bin/sh
+# First-time setup of Stacks Console: writes `.env` and creates the game servers' data directory,
+# so that `docker compose up -d` is the only step left. No sudo, no network, safe to run again.
+#
+#   ./setup [--data-root PATH] [--games LIST] [--port PORT]
+#
+# What it does, in this directory (the one this script is in):
+#   * `.env.example` -> `.env` if there is no `.env` yet. An existing `.env` is never replaced;
+#     only the values below are filled in, and only where they are missing.
+#   * POSTGRES_PASSWORD, JWT_SECRET, GSS_SECRET_KEY and SEED_ADMIN_PASSWORD: generated wherever
+#     they are empty or still the template's `change-me…` placeholder. A value that is already set
+#     is kept. The database password is never changed once the database exists (DB_DATA_DIR).
+#   * DATA_ROOT: `<this directory>/data/servers` for a new `.env`, or the path given with
+#     `--data-root`. Created if missing. It must belong to APP_UID, the uid the API runs as: when
+#     your uid is not APP_UID (default 1000), APP_UID becomes yours, and the images have to be
+#     built here (`docker compose up -d --build`), because the prebuilt ones run as 1000.
+#   * `--games minecraft,factorio` -> GSS_GAMES (games switched on at the very first start).
+#     `--port 8081` -> DASHBOARD_PORT.
+#   * Prints how to start the stack, the URL and, when it generated it, the one-time admin
+#     password. It never prints the other secrets.
+set -eu
+
+# Games GSS_GAMES accepts (backend: models/server.py GameType; a test compares the two lists).
+KNOWN_GAMES="minecraft factorio valheim pz arma_reforger vintagestory avorion"
+# The template's placeholders start with this.
+PLACEHOLDER="change-me"
+
+usage() {
+  cat <<'EOF'
+Usage: ./setup [--data-root PATH] [--games LIST] [--port PORT]
+
+Writes .env (from .env.example, with generated secrets) and creates the data directory, so that
+`docker compose up -d` starts Stacks Console. Safe to run again: an existing .env is kept and
+only missing values are filled in.
+
+  --data-root PATH  host directory for every game server's files
+                    (default for a new .env: ./data/servers in this directory)
+  --games LIST      games switched on at the first start, comma-separated, or `all`:
+                    minecraft, factorio, valheim, pz, arma_reforger, vintagestory, avorion
+                    (default: none, the first-run screen asks)
+  --port PORT       host port of the web UI (default 8080)
+  -h, --help        this text
+EOF
+}
+
+die() {
+  printf 'setup: %s\n' "$*" >&2
+  exit 1
+}
+
+caller_dir=$(pwd)
+data_root_arg=""
+games_arg=""
+port_arg=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --data-root) [ $# -ge 2 ] || die "--data-root needs a path"; data_root_arg=$2; shift 2 ;;
+    --data-root=*) data_root_arg=${1#*=}; shift ;;
+    --games) [ $# -ge 2 ] || die "--games needs a list"; games_arg=$2; shift 2 ;;
+    --games=*) games_arg=${1#*=}; shift ;;
+    --port) [ $# -ge 2 ] || die "--port needs a number"; port_arg=$2; shift 2 ;;
+    --port=*) port_arg=${1#*=}; shift ;;
+    -h | --help) usage; exit 0 ;;
+    *) usage >&2; die "unknown option: $1" ;;
+  esac
+done
+
+# DATA_ROOT goes into a volume line of the compose file and into .env, unquoted: Compose splits
+# a volume at ':' and expands '$', and a blank, a quote or '#' breaks the .env line.
+check_path() {
+  case "$1" in
+    *[:\$\"\'\\\`\#\ \	]*)
+      die "DATA_ROOT '$1' contains a character Docker Compose cannot take (':', '\$', a quote, '#', '\\' or a blank). Choose another directory with --data-root." ;;
+  esac
+}
+
+# Check the options before anything is written.
+[ -z "$data_root_arg" ] || check_path "$data_root_arg"
+if [ -n "$port_arg" ]; then
+  case "$port_arg" in
+    *[!0-9]* | "") die "--port: '$port_arg' is not a port number" ;;
+  esac
+  [ "$port_arg" -ge 1 ] && [ "$port_arg" -le 65535 ] || die "--port: $port_arg is not between 1 and 65535"
+fi
+games=""
+if [ -n "$games_arg" ]; then
+  for g in $(printf '%s' "$games_arg" | tr ',' ' ' | tr '[:upper:]' '[:lower:]'); do
+    case " all $KNOWN_GAMES " in
+      *" $g "*) games="${games:+$games,}$g" ;;
+      *) die "--games: '$g' is not a game. Known: all, $(printf '%s' "$KNOWN_GAMES" | sed 's/ /, /g')" ;;
+    esac
+  done
+  [ -n "$games" ] || die "--games: the list is empty"
+fi
+
+cd "$(dirname "$0")"
+here=$(pwd -P)
+[ -f .env.example ] || die "no .env.example in $here"
+
+tmp=""
+trap '[ -z "$tmp" ] || rm -f "$tmp"' EXIT
+# Everything this script creates from here on is private, except the data directory (below).
+umask 077
+
+# The value of KEY in .env (the last uncommented line wins, as in Compose), without quotes.
+get_var() {
+  sed -n "s/^$1=//p" .env | tail -n 1 | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'\$/\1/"
+}
+
+# Set KEY=VALUE in .env: replaces every uncommented `KEY=` line, else the first commented
+# `# KEY=` line of the template, else appends it. Written to a temporary file and moved over
+# .env, so an interrupted run leaves the old file.
+set_var() {
+  tmp=$(mktemp ./.env.setup.XXXXXX)
+  if grep -q "^$1=" .env; then
+    KEY=$1 VALUE=$2 awk 'BEGIN { key = ENVIRON["KEY"]; line = key "=" ENVIRON["VALUE"] }
+      index($0, key "=") == 1 { print line; next } { print }' .env >"$tmp"
+  elif grep -q "^# $1=" .env; then
+    KEY=$1 VALUE=$2 awk 'BEGIN { key = ENVIRON["KEY"]; line = key "=" ENVIRON["VALUE"] }
+      !done && index($0, "# " key "=") == 1 { print line; done = 1; next } { print }' .env >"$tmp"
+  else
+    cat .env >"$tmp"
+    printf '%s=%s\n' "$1" "$2" >>"$tmp"
+  fi
+  mv -f "$tmp" .env
+  tmp=""
+}
+
+# BYTES random bytes as hex: openssl if it works, else /dev/urandom.
+random_hex() {
+  value=$(openssl rand -hex "$1" 2>/dev/null) || value=""
+  if [ "${#value}" -ne $(($1 * 2)) ]; then
+    value=$(od -An -N"$1" -tx1 /dev/urandom | tr -d ' \n')
+  fi
+  [ "${#value}" -eq $(($1 * 2)) ] || die "could not generate a random value (no openssl, no /dev/urandom)"
+  printf '%s' "$value"
+}
+
+is_unset() {
+  case "$1" in
+    "" | "$PLACEHOLDER"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# The owner uid of a path (portable: no GNU stat).
+owner_uid() {
+  # shellcheck disable=SC2012  # one directory, numeric owner column: no name parsing involved
+  ls -nd "$1" | awk '{ print $3 }'
+}
+
+# --- .env ---
+new_env=0
+if [ -e .env ]; then
+  [ -f .env ] || die ".env exists but is not a file"
+  printf 'Using the existing .env (nothing in it is replaced, missing values are filled in).\n'
+else
+  cp .env.example .env
+  new_env=1
+  printf 'Created .env from .env.example.\n'
+fi
+chmod 600 .env
+
+# --- Secrets ---
+generated=""
+admin_password=""
+db_dir=$(get_var DB_DATA_DIR)
+db_dir=${db_dir:-./data/db}
+for spec in POSTGRES_PASSWORD:24 JWT_SECRET:32 GSS_SECRET_KEY:32 SEED_ADMIN_PASSWORD:12; do
+  key=${spec%%:*}
+  bytes=${spec#*:}
+  is_unset "$(get_var "$key")" || continue
+  if [ "$key" = POSTGRES_PASSWORD ] && [ -d "$db_dir" ]; then
+    # The database was initialised with whatever this value was; a new one would lock the API out.
+    printf 'WARNING: POSTGRES_PASSWORD is not set, but the database in %s already exists.\n' "$db_dir" >&2
+    printf '         Left as it is: set it to the password the database was created with.\n' >&2
+    continue
+  fi
+  value=$(random_hex "$bytes")
+  set_var "$key" "$value"
+  generated="${generated:+$generated, }$key"
+  [ "$key" != SEED_ADMIN_PASSWORD ] || admin_password=$value
+done
+
+# --- Games and port ---
+[ -z "$games" ] || set_var GSS_GAMES "$games"
+[ -z "$port_arg" ] || set_var DASHBOARD_PORT "$port_arg"
+
+# --- DATA_ROOT ---
+my_uid=$(id -u)
+my_gid=$(id -g)
+app_uid=$(get_var APP_UID)
+app_uid=${app_uid:-1000}
+case "$app_uid" in *[!0-9]*) die "APP_UID in .env is not a number: '$app_uid'" ;; esac
+if [ -n "$data_root_arg" ]; then
+  case "$data_root_arg" in
+    /*) data_root=$data_root_arg ;;
+    *) data_root=$caller_dir/$data_root_arg ;;
+  esac
+elif [ "$new_env" = 1 ]; then
+  data_root=$here/data/servers
+else
+  data_root=$(get_var DATA_ROOT)
+  data_root=${data_root:-/srv/gameservers}
+fi
+case "$data_root" in
+  /*) ;;
+  *) die "DATA_ROOT must be an absolute path, not '$data_root'" ;;
+esac
+# The game directories are handed to the game containers as bind mounts by the same path.
+if [ ! -d "$data_root" ]; then
+  (umask 022 && mkdir -p "$data_root") 2>/dev/null ||
+    die "cannot create $data_root as uid $my_uid. Create it yourself (owned by uid $app_uid) or choose another directory with --data-root."
+fi
+data_root=$(cd "$data_root" && pwd -P)
+[ "$data_root" != / ] || die "DATA_ROOT must not be /"
+check_path "$data_root"
+[ "$(get_var DATA_ROOT)" = "$data_root" ] || set_var DATA_ROOT "$data_root"
+
+# --- APP_UID: the API's uid must own DATA_ROOT ---
+root_uid=$(owner_uid "$data_root")
+if [ "$root_uid" != "$app_uid" ]; then
+  if [ "$my_uid" = 0 ]; then
+    chown "$app_uid:$app_uid" "$data_root"
+    printf 'Handed %s to uid %s (APP_UID).\n' "$data_root" "$app_uid"
+  elif [ "$root_uid" = "$my_uid" ]; then
+    set_var APP_UID "$my_uid"
+    app_uid=$my_uid
+    printf 'APP_UID set to %s, your uid, which owns %s.\n' "$my_uid" "$data_root"
+  else
+    die "$data_root belongs to uid $root_uid, but the API runs as uid $app_uid (APP_UID). Hand it over with \`sudo chown $app_uid $data_root\`, or choose another directory with --data-root."
+  fi
+fi
+# The nightly database dumps belong to the same user (the default is 1000:1000).
+if [ "$my_uid" != 0 ] && [ "$app_uid" = "$my_uid" ] && [ "$my_uid:$my_gid" != "1000:1000" ]; then
+  backup_owner=$(get_var DB_BACKUP_OWNER)
+  [ -n "$backup_owner" ] || set_var DB_BACKUP_OWNER "$my_uid:$my_gid"
+fi
+chmod 600 .env
+
+# --- Summary ---
+port=$(get_var DASHBOARD_PORT)
+port=${port:-8080}
+bind=$(get_var DASHBOARD_BIND)
+case "${bind:-127.0.0.1}" in
+  0.0.0.0 | "[::]") url="http://<this host's address>:$port" ;;
+  *) url="http://${bind:-127.0.0.1}:$port" ;;
+esac
+user=$(get_var SEED_ADMIN_USERNAME)
+user=${user:-admin}
+games_now=$(get_var GSS_GAMES)
+start="docker compose up -d"
+[ "$app_uid" = 1000 ] || start="docker compose up -d --build"
+
+printf '\n'
+printf '  .env       %s (mode 600)\n' "$here/.env"
+printf '  secrets    %s\n' "${generated:-already set, kept}"
+printf '  DATA_ROOT  %s (owned by uid %s)\n' "$data_root" "$app_uid"
+printf '  games      %s\n' "${games_now:-none yet, the first-run screen asks}"
+[ "$caller_dir" = "$here" ] || [ "$(cd "$caller_dir" && pwd -P)" = "$here" ] || start="cd \"$here\" && $start"
+printf '\nStart it:\n\n  %s\n\n' "$start"
+if [ "$app_uid" != 1000 ]; then
+  printf 'The prebuilt images run as uid 1000, the API here must run as %s: "--build" builds\n' "$app_uid"
+  printf 'them from this checkout. Use it again after every update.\n\n'
+fi
+printf 'Then open %s and sign in as "%s"' "$url" "$user"
+if [ -n "$admin_password" ]; then
+  printf ' with this one-time password:\n\n  %s\n\n' "$admin_password"
+  printf 'You choose your own password at the first sign-in.\n'
+else
+  printf '.\nThe one-time password is SEED_ADMIN_PASSWORD in .env: grep '"'"'^SEED_ADMIN_PASSWORD='"'"' .env\n'
+fi

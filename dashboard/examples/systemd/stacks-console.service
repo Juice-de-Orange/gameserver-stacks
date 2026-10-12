@@ -1,0 +1,34 @@
+# Stops the game servers of Stacks Console cleanly before Docker goes down, and starts the same
+# ones again after boot. Docker alone gives every container 15 seconds at shutdown, which is not
+# enough for a large world. A server stopped by `stop-all` counts as stopped by hand, so its
+# restart policy does not bring it back at boot: `start-recorded` does.
+#
+# Adjust WorkingDirectory to the `dashboard/` directory of your checkout (the one with
+# docker-compose.yml and .env), then:
+#   sudo cp examples/systemd/stacks-console.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now stacks-console.service
+# Check it with `systemctl status stacks-console` and `journalctl -u stacks-console`.
+[Unit]
+Description=Stacks Console: clean stop of the game servers on shutdown, restart on boot
+Requires=docker.service
+# Ordered after docker.service, so at shutdown this unit stops BEFORE Docker does.
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/path/to/gameserver-stacks/dashboard
+# Bring the dashboard up and wait until its database and API are healthy, then start the game
+# servers that were running before the last `stop-all`.
+ExecStart=/usr/bin/docker compose up -d --wait
+ExecStart=/usr/bin/docker compose exec -T console-api python -m app.cli start-recorded
+# Record which game servers are running, then stop each one the way the dashboard does
+# (announcement, save, its own grace period).
+ExecStop=/usr/bin/docker compose exec -T console-api python -m app.cli stop-all
+TimeoutStartSec=600
+# Longer than the slowest world save of all your servers together: they stop one after another.
+TimeoutStopSec=900
+
+[Install]
+WantedBy=multi-user.target

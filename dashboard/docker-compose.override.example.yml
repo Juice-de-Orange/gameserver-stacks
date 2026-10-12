@@ -1,0 +1,21 @@
+# Example: game server data in more than one host directory.
+#
+# By default every game server's data lives under DATA_ROOT, the one directory docker-compose.yml
+# binds into the API container. To keep some servers elsewhere (a second disk, say), copy this
+# file to `docker-compose.override.yml` next to docker-compose.yml — Compose reads that name on
+# its own — replace /mnt/games with your directory and run `docker compose up -d` again.
+#
+# Two things are needed for every extra directory:
+#   1. a bind mount with the SAME path on both sides: when the API creates a game container it
+#      hands these paths to the Docker API as HOST paths;
+#   2. the directory in ALLOWED_DATA_ROOTS, the allowlist a server's data directory must lie
+#      under. Once it is set, DATA_ROOT is no longer added by itself, so list it as well.
+# As with DATA_ROOT, the content must be owned by the uid the API runs as (APP_UID, 1000).
+services:
+  console-api:
+    volumes:
+      - /mnt/games:/mnt/games
+    environment:
+      # This value wins over an ALLOWED_DATA_ROOTS line in .env (compose `environment` beats
+      # `env_file`); keep the list in one place.
+      ALLOWED_DATA_ROOTS: ${DATA_ROOT:-/srv/gameservers},/mnt/games
