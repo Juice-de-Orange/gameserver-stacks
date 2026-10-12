@@ -1,0 +1,14 @@
+{
+  "close.1006": "Verbindung abgebrochen — Dashboard nicht erreichbar (Deploy? Netz?).",
+  "close.4400": "Kein Server angegeben.",
+  "close.4401": "Keine Berechtigung — oder die Sitzung ist abgelaufen.",
+  "close.4404": "Server unbekannt oder deaktiviert.",
+  "close.4501": "Für dieses Spiel gibt es keinen Treiber.",
+  "console.closed": "✖ Konsole ({{server}}): {{reason}}",
+  "log.closed": "✖ Server-Log ({{server}}): {{reason}}",
+  "log.ended": "» Server-Log ({{server}}) endete — läuft der Container?",
+  "notConnected": "✖ Nicht verbunden — Befehl nicht gesendet.",
+  "serverSwitched": "» Server gewechselt: {{label}} ({{server}})",
+  "toggle.label": "Konsole",
+  "toggle.title": "Live-Konsole andocken"
+}

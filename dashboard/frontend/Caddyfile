@@ -1,0 +1,56 @@
+# Reverse proxy and SPA delivery. Listens on :80 inside the stack (published by the compose file
+# as ${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-8080}); TLS is terminated by whatever you put
+# in front of it — your own reverse proxy or tunnel, or the bundled HTTPS front `console-tls`
+# (compose profile `https`, Caddyfile.https), which reaches this Caddy over `console-front`.
+{
+	servers {
+		# Whose X-Forwarded-For is believed when working out the client address. By default every
+		# private or loopback peer: this Caddy is published on 127.0.0.1 by default, so the only
+		# things that reach it are a reverse proxy or tunnel on the host and containers on its
+		# network.
+		# Override with CADDY_TRUSTED_PROXIES (space-separated addresses or CIDR ranges) if your
+		# proxy connects from a public address.
+		trusted_proxies static {$CADDY_TRUSTED_PROXIES:private_ranges}
+		# Read X-Forwarded-For from the right, so that entries a client sent itself are ignored.
+		trusted_proxies_strict
+	}
+}
+
+:80 {
+	encode gzip
+
+	header {
+		# The SPA loads scripts, styles, fonts and images from its own origin only: no inline
+		# script (the theme bootstrap is /theme-init.js), no inlined fonts (`assetsInlineLimit: 0`
+		# in vite.config.ts). React sets `style` props through the CSSOM, which `style-src` does
+		# not restrict. `img-src data:` is for the inline SVG favicon; `connect-src 'self'` covers
+		# the API and the WebSockets.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		X-Content-Type-Options nosniff
+		# For browsers that do not know `frame-ancestors`.
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+	}
+
+	# API and WebSockets -> backend (Caddy handles the WebSocket upgrade itself). `console-api` is
+	# the compose SERVICE name, which Docker resolves within this compose project — whatever the
+	# project and container names are.
+	@backend path /api/* /ws/*
+	handle @backend {
+		reverse_proxy console-api:8000 {
+			# Hand the API exactly one, already validated client address. The API believes this
+			# header only from the proxies listed in its TRUSTED_PROXIES (the compose file lists
+			# this service, `console-web`).
+			header_up X-Forwarded-For {client_ip}
+			# The API would prefer this header, and nothing here vouches for it.
+			header_up -CF-Connecting-IP
+		}
+	}
+
+	# SPA: static files, falling back to index.html (client-side routing)
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

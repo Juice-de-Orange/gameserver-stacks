@@ -1,0 +1,21 @@
+{
+  "countdown.d": "{{d}} d",
+  "countdown.dh": "{{d}} d {{h}} h",
+  "countdown.h": "{{h}} h",
+  "countdown.hm": "{{h}} h {{m}} min",
+  "countdown.m": "{{m}} min",
+  "countdown.now": "any moment",
+  "duration.dh": "{{d}}d {{h}}h",
+  "duration.hm": "{{h}}h {{m}}m",
+  "duration.m": "{{m}}m",
+  "relative.days": "{{n}} d ago",
+  "relative.hours": "{{n}} h ago",
+  "relative.minutes": "{{n}} min ago",
+  "relative.now": "just now",
+  "span.days_one": "{{n}} day",
+  "span.days_other": "{{n}} days",
+  "span.hours_one": "{{n}} hour",
+  "span.hours_other": "{{n}} hours",
+  "span.minutes_one": "{{n}} minute",
+  "span.minutes_other": "{{n}} minutes"
+}

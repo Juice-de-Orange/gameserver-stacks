@@ -1,0 +1,10 @@
+{
+  "reason.actions.arma_reforger": "Through the server console, Arma Reforger only knows the player list, kick and ban. Spawning, teleporting and weather exist only in the game itself, in the Game Master menu — add yourself under Configuration → Admins for that.",
+  "reason.actions.valheim": "Valheim has no console that can be controlled remotely — neither RCON nor stdin. Game mastering only works in the game itself (F5), and for that you have to be listed as an admin under Configuration. Banning and unbanning still go through Moderation.",
+  "reason.console.default": "This server has no controllable console.",
+  "reason.console.valheim": "The dedicated Valheim server has no console that can be controlled remotely — no RCON, no stdin. That is not a missing setup step but a property of the game. Player count and version come from the Steam query, banning goes through the list files.",
+  "reason.join.noPort": "This server has no game port published to the outside.",
+  "reason.noServer": "No server selected.",
+  "reason.unrecorded": "Not available for {{game}} — no reason has been recorded, please report this.",
+  "reason.version.default": "This server does not report any version management."
+}

@@ -1,0 +1,5 @@
+{
+  "noPermission": "No permission to send commands",
+  "placeholder": "RCON command… (↑ for history)",
+  "send": "Send"
+}

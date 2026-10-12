@@ -1,0 +1,21 @@
+{
+  "install.done": "“{{file}}” downloaded — stored disabled, like every upload.",
+  "install.failed": "Installing failed",
+  "result.downloads": "{{owner}} · {{downloads}} downloads",
+  "result.forVersion": "for {{version}}",
+  "result.install": "Install",
+  "search.empty": "Nothing found.",
+  "search.note": "The portal cannot search by itself — the whole catalog is loaded for that and filtered here. That is why it takes a moment.",
+  "search.placeholder": "Search mods…",
+  "search.tooShort": "Please search for at least two characters.",
+  "sub": "Search, download and see updates",
+  "title": "Mod portal",
+  "updates.allCurrent": "Everything is up to date.",
+  "updates.allCurrentUnknown": "Everything is up to date ({{n}} cannot be checked).",
+  "updates.download": "Download",
+  "updates.error": "Updates could not be fetched: {{error}}",
+  "updates.heading": "Updates",
+  "updates.notChecked": "Not checked — see the error above. That is something different from “everything is up to date”.",
+  "updates.unknown_one": "The portal does not know {{count}} mod (self-made or renamed): <names>{{names}}</names>. Whether it is up to date cannot be told from here.",
+  "updates.unknown_other": "The portal does not know {{count}} mods (self-made or renamed): <names>{{names}}</names>. Whether they are up to date cannot be told from here."
+}

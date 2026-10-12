@@ -1,0 +1,10 @@
+{
+  "firewall.backend": "Der Firewall-Helfer kann iptables auf diesem Host nicht nutzen: {{reason}}",
+  "firewall.helper_failed": "Der Firewall-Helfer ist fehlgeschlagen ({{reason}}).",
+  "firewall.off": "Der Firewall-Helfer ist aus. GSS_FIREWALL_TOKEN setzen und `firewall` zu COMPOSE_PROFILES in der .env hinzufügen, dann `docker compose up -d`.",
+  "firewall.plan_changed": "Die Regeln oder die Server haben sich seit der Vorschau geändert. Die neue Vorschau prüfen und erneut anwenden.",
+  "firewall.refused": "Der Firewall-Helfer lehnt diesen Zustand ab: {{reason}}",
+  "firewall.token_refused": "Der Firewall-Helfer hat das Token des API abgelehnt: GSS_FIREWALL_TOKEN muss für console-api und console-firewall gleich sein.",
+  "firewall.token_too_short": "GSS_FIREWALL_TOKEN ist kürzer als {{minimum}} Zeichen; damit startet der Helfer nicht.",
+  "firewall.unreachable": "Der Firewall-Helfer antwortet nicht auf {{socket}} ({{reason}}). Ist das Compose-Profil `firewall` eingeschaltet, und zeigt `docker compose logs console-firewall`, dass er lauscht?"
+}

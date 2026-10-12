@@ -1,0 +1,22 @@
+{
+  "active": "will be loaded",
+  "empty": "There is no save.",
+  "files_one": "{{count}} file",
+  "files_other": "{{count}} files",
+  "note": "A switch only takes effect with <strong>“Recreate”</strong> — the active world depends on a container variable, and a restart does not pick it up.",
+  "remove.action": "Put away",
+  "remove.activeReason": "The save that is loaded at the next start stays where it is — otherwise the server would start into a world that no longer exists.",
+  "remove.confirm.body": "The save is moved aside, not deleted — afterwards it sits in a folder of its own next to the others. Bringing it back is only possible on the host.",
+  "remove.confirm.title": "Put “{{name}}” away?",
+  "remove.done": "“{{name}}” moved aside.",
+  "remove.failed": "Putting away failed",
+  "remove.title": "Put away (moved, not deleted)",
+  "select.action": "Set",
+  "select.already": "This save is already set.",
+  "select.confirm.body": "The running server is NOT touched. The switch only takes effect with “Recreate” — until then the old world keeps running while the new one is already shown here.",
+  "select.confirm.title": "Set “{{name}}” as the world?",
+  "select.done": "Set.",
+  "select.failed": "Switch failed",
+  "sub": "What is on disk — and what gets loaded at the next start",
+  "title": "Worlds"
+}

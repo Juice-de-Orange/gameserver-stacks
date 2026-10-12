@@ -1,0 +1,13 @@
+{
+  "chip.blocked": "Mods fehlerhaft",
+  "chip.ok": "Mods ok",
+  "chip.pending": "Unangewendete Änderungen",
+  "chip.warn": "Mods prüfen",
+  "panel.active": "{{mods}} Mod(s), {{maps}} Karte(n) aktiv",
+  "panel.activePending": "{{mods}} Mod(s), {{maps}} Karte(n) aktiv · Entwurf weicht ab: {{summary}}",
+  "panel.blocked_one": "{{count}} Fehler in der laufenden Konfiguration",
+  "panel.blocked_other": "{{count}} Fehler in der laufenden Konfiguration",
+  "panel.ok": "Die laufende Mod-Konfiguration ist in Ordnung.",
+  "panel.warn_one": "{{count}} Hinweis zur laufenden Konfiguration",
+  "panel.warn_other": "{{count}} Hinweise zur laufenden Konfiguration"
+}

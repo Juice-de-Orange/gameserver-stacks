@@ -1,0 +1,12 @@
+{
+  "activated": "{{game}} is now active.",
+  "deactivated": "{{game}} is now inactive.",
+  "intro": "Only active games appear when you add a server, look up versions or download mods. Nothing of an inactive game is downloaded. A game that still has an enabled server cannot be switched off.",
+  "none": "No game is active yet. Switch on the games you want to run.",
+  "saveFailed": "Saving failed.",
+  "state.active": "Active",
+  "state.inactive": "Inactive",
+  "subtitle": "Which games this installation runs",
+  "title": "Games",
+  "toggle": "Run {{game}} on this installation"
+}

@@ -1,0 +1,11 @@
+{
+  "clear": "Verlauf leeren",
+  "close": "Konsole schließen",
+  "hint.failed": "Server-Liste konnte nicht geladen werden.",
+  "hint.loading": "Server-Liste wird geladen…",
+  "hint.none": "Kein Server vorhanden.",
+  "hint.ready": "Bereit für Befehle…",
+  "hint.waitingLog": "Warte auf Server-Geschehen…",
+  "reloadServers": "Server-Liste erneut laden",
+  "title": "Live-Konsole"
+}

@@ -1,0 +1,11 @@
+{
+  "clear": "Clear history",
+  "close": "Close console",
+  "hint.failed": "The server list could not be loaded.",
+  "hint.loading": "Loading the server list…",
+  "hint.none": "No server available.",
+  "hint.ready": "Ready for commands…",
+  "hint.waitingLog": "Waiting for server activity…",
+  "reloadServers": "Reload the server list",
+  "title": "Live console"
+}

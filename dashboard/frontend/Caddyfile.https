@@ -1,0 +1,36 @@
+# HTTPS front of the dashboard. Used only by the compose service `console-tls` (profile `https`),
+# which mounts this file as /etc/caddy/Caddyfile; the plain setup never reads it.
+#
+# It terminates TLS for DASHBOARD_DOMAIN and hands every request to the bundled Caddy
+# (`console-web`, frontend/Caddyfile), which serves the SPA, sets the security headers and
+# proxies /api and /ws exactly as without HTTPS. Caddy's automatic HTTPS does the rest for a site
+# address that is a domain name: it obtains and renews the certificate, answers the CA's
+# challenge on port 80 and redirects every other HTTP request there to HTTPS.
+#
+# No `trusted_proxies`: this Caddy is the edge, so every peer is a client and an X-Forwarded-For
+# a client sends is ignored. `reverse_proxy` replaces it with the peer address; console-web
+# believes that, because this container connects from a private address (its default
+# CADDY_TRUSTED_PROXIES), and passes it on to the API.
+
+# Where the certificate comes from, chosen by ACME_CA (the compose file checks the value).
+(tls_acme) {
+	# A public ACME CA (Let's Encrypt, ZeroSSL as fallback); ACME_EMAIL is the contact address.
+	tls {$ACME_EMAIL}
+}
+
+(tls_internal) {
+	# Caddy's own CA. FOR TESTING ONLY: no browser trusts it.
+	tls internal
+}
+
+{$DASHBOARD_DOMAIN} {
+	import tls_{$ACME_CA}
+
+	# Sent in this mode only: a browser that has seen it refuses plain HTTP for this name for a
+	# year. Deliberately without includeSubDomains — other names below the domain are not ours.
+	header Strict-Transport-Security "max-age=31536000"
+
+	# `console-web` is the compose SERVICE name, resolved within this compose project. The Host
+	# header passes through unchanged; WebSocket upgrades (/ws) are handled by Caddy itself.
+	reverse_proxy console-web:80
+}

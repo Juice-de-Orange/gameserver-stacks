@@ -1,0 +1,14 @@
+{
+  "close.1006": "Connection lost — the dashboard cannot be reached (deployment? network?).",
+  "close.4400": "No server given.",
+  "close.4401": "Not permitted — or the session has expired.",
+  "close.4404": "Server unknown or disabled.",
+  "close.4501": "There is no driver for this game.",
+  "console.closed": "✖ Console ({{server}}): {{reason}}",
+  "log.closed": "✖ Server log ({{server}}): {{reason}}",
+  "log.ended": "» Server log ({{server}}) ended — is the container running?",
+  "notConnected": "✖ Not connected — command not sent.",
+  "serverSwitched": "» Switched server: {{label}} ({{server}})",
+  "toggle.label": "Console",
+  "toggle.title": "Dock the live console"
+}

@@ -1,0 +1,12 @@
+{
+  "addFirst": "Add your first server",
+  "admin": "Add a game server to start: choose the game, check the suggested values, create it.",
+  "games.body": "Choose the games this installation runs. Only these get presets and downloads; you can change it later under Settings → Games.",
+  "games.change": "Change games",
+  "games.continue": "Continue",
+  "games.later": "Nothing is downloaded yet — a game's files come with its first server.",
+  "games.saveFailed": "Saving the games failed.",
+  "games.title": "Which games do you want to run?",
+  "member": "An admin has not set up a game server yet.",
+  "title": "No game server yet"
+}

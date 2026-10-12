@@ -1,0 +1,11 @@
+{
+  "backToLogin": "Back to sign-in",
+  "error.failed": "Registration failed",
+  "error.unreachable": "Server not reachable — please try again later.",
+  "field.displayName": "Display name",
+  "field.password": "Password (at least 8 characters)",
+  "field.username": "Username",
+  "received": "Registration received — an admin has to approve you.",
+  "submit": "Register",
+  "title": "Register"
+}

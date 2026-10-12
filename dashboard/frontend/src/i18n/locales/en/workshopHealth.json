@@ -1,0 +1,23 @@
+{
+  "allAvailable": "All {{n}} Workshop items can be fetched.",
+  "cleanup.confirm.body_one": "{{count}} mod is verifiably no longer available on the Workshop. It is taken out of the DRAFT — nothing changes on the running server through that. Only “Apply” transfers it, with mandatory backup, quarantine and a way back.",
+  "cleanup.confirm.body_other": "{{count}} mods are verifiably no longer available on the Workshop. They are taken out of the DRAFT — nothing changes on the running server through that. Only “Apply” transfers it, with mandatory backup, quarantine and a way back.",
+  "cleanup.confirm.title": "Take the mods that can no longer be fetched out of the draft?",
+  "cleanup.done_one": "{{count}} mod taken out of the draft — “Apply” transfers it.",
+  "cleanup.done_other": "{{count}} mods taken out of the draft — “Apply” transfers it.",
+  "cleanup.failed": "Cleanup failed",
+  "cleanup.label": "Take out of the draft",
+  "cleanup.nothing": "Nothing to remove.",
+  "incomplete": "The check was <strong>incomplete</strong> — Steam was not reachable or gave an unclear answer. That is a statement about the check, not about the mods. Cleanup is therefore locked.",
+  "listUnreadable": "The mod list cannot be read — <strong>nothing</strong> was checked. This card deliberately says nothing here.",
+  "loading": "Workshop check running…",
+  "recheck.button": "Check again",
+  "recheck.title": "Ask Steam again now",
+  "removed.badge": "gone",
+  "removed.explain": "Joining players can no longer download them and get stuck while joining. Whoever still has them in the local cache keeps getting in — which is why this is often only noticed when someone new wants to join.",
+  "removed.heading_one": "{{count}} mod can no longer be fetched",
+  "removed.heading_other": "{{count}} mods can no longer be fetched",
+  "title": "Workshop check",
+  "unverifiable.explain": "No verdict — neither good nor bad. Cleanup explicitly does not touch these items.",
+  "unverifiable.heading": "{{n}} cannot be checked"
+}

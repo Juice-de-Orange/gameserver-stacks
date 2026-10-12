@@ -1,0 +1,545 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================================
+   Stacks Console — design tokens.
+
+   Values are space-separated RGB channels so that Tailwind's
+   `<alpha-value>` modifier (e.g. `bg-surface-card/60`) keeps working.
+
+   THREE layers, and the separation is the whole trick:
+
+   1. CHROME (`:root`, `:root.dark`) — navigation, tables, forms, dialogs.
+      One system, the same everywhere, deliberately strict: hairlines
+      instead of shadows, tight radii, high contrast, no gradients.
+      Nothing here may have "character"; this is where the numbers are.
+
+   2. ACCENT per server (`[data-game="…"]`) — overrides `--primary*` and
+      `--accent*`. Tints the whole app to the active server so that one
+      always SEES where one is. Status colours (success/warning/danger)
+      stay constant on purpose.
+
+   3. ART STYLE per game (`--g-*`) — pattern, edge shape, grain, vignette,
+      label typography. These tokens are read ONLY by `components/game/`
+      (GameSurface/GameRule/GameHero/GameLabel). They are why Factorio may
+      look like a factory and Zomboid like the apocalypse without any
+      table suffering for it.
+
+   A new `--g-*` rule belongs here and is read by GameSurface — NOT as a
+   special case in a page. The same rule in several places is how copies
+   drift apart.
+   ===================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces + hairlines (cool paper white; legacy scale `ink`) */
+  --ink: 247 248 250;      /* app background                        */
+  --ink-900: 255 255 255;  /* raised: sidebar / top bar / inputs    */
+  --ink-800: 255 255 255;  /* cards (edge + minimal shadow)         */
+  --ink-700: 240 242 245;  /* hover / sunken / skeleton             */
+  --ink-600: 222 225 231;  /* hairline                              */
+  --ink-500: 197 201 210;  /* strong edge / scrollbar               */
+
+  /* Text (legacy `bone`) — high contrast, true black at the top */
+  --bone: 15 17 21;
+  --bone-muted: 82 88 100;
+  --bone-dim: 132 139 152;
+
+  /* Primary = default accent (graphite blue). Overridden per game. */
+  --primary: 52 92 168;
+  --primary-strong: 38 72 140;
+  --primary-soft: 231 238 250;
+  --primary-text: 34 68 134;
+  --btn-primary: 42 80 152;
+  --on-primary: 255 255 255;
+
+  /* Accent = second channel per game (default: copper) */
+  --accent: 168 96 44;
+  --accent-soft: 250 238 228;
+
+  /* Success / online (legacy `toxic`) */
+  --toxic: 24 148 78;
+  --toxic-light: 18 124 64;
+  --toxic-dark: 24 148 78;
+  --toxic-deep: 224 244 232;
+
+  /* Warning (legacy `rust`) */
+  --rust: 184 122 20;
+  --rust-light: 156 102 12;
+
+  /* Danger (legacy `blood`) */
+  --blood: 202 58 50;
+  --blood-light: 178 40 34;
+  --blood-dark: 244 198 194;
+  --blood-deep: 253 236 234;
+
+  --shadow: 12 16 24;
+
+  /* --- Art-style base values (each game overrides what it needs) --- */
+  --g-radius: 6px;
+  --g-edge-w: 1px;
+  --g-edge-color: rgb(var(--primary) / 0.32);
+  --g-pattern: none;
+  --g-pattern-size: auto;
+  --g-pattern-pos: 0 0;
+  --g-pattern-op: 1;
+  --g-vignette: none;
+  --g-corners: none;
+  --g-grain-op: 0.05;
+  --g-clip: none;
+  --g-rule: linear-gradient(90deg, rgb(var(--primary) / 0.5), rgb(var(--primary) / 0));
+  --g-rule-h: 2px;
+  --g-label-stretch: 100%;
+  --g-label-weight: 700;
+  --g-label-tracking: 0.16em;
+  --g-label-transform: uppercase;
+
+  /* Grain — a single tile, reused everywhere (no external asset). */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  --ink: 9 10 12;          /* deep near-black                       */
+  --ink-900: 17 19 22;     /* raised                                */
+  --ink-800: 22 24 28;     /* cards                                 */
+  --ink-700: 31 34 40;     /* hover / sunken                        */
+  --ink-600: 44 48 56;     /* hairline                              */
+  --ink-500: 68 73 84;     /* strong edge                           */
+
+  --bone: 240 242 246;
+  --bone-muted: 158 165 177;
+  --bone-dim: 110 118 131;
+
+  --primary: 122 162 232;
+  --primary-strong: 150 186 244;
+  --primary-soft: 22 32 52;
+  --primary-text: 158 192 246;
+  --btn-primary: 62 106 184;
+  --on-primary: 255 255 255;
+
+  --accent: 216 146 88;
+  --accent-soft: 44 32 22;
+
+  --toxic: 46 190 108;
+  --toxic-light: 96 214 146;
+  --toxic-dark: 34 126 76;
+  --toxic-deep: 16 42 28;
+
+  --rust: 224 166 68;
+  --rust-light: 238 186 104;
+
+  --blood: 232 108 98;
+  --blood-light: 242 142 134;
+  --blood-dark: 112 50 44;
+  --blood-deep: 44 22 20;
+
+  --shadow: 0 0 0;
+}
+
+/* =====================================================================
+   Layers 2+3 — per game: accent colours AND art style.
+   Order per game: light first, `.dark …` after it (the higher specificity
+   wins in dark mode). The `--g-*` tokens sit in the light block and apply
+   to both modes unless the dark block touches them.
+   ===================================================================== */
+
+/* ---------- Project Zomboid — apocalypse: embers, ash, hazard tape ---- */
+[data-game="pz"] {
+  --primary: 190 78 32; --primary-strong: 162 62 22; --primary-soft: 250 232 222;
+  --primary-text: 158 60 18; --btn-primary: 174 68 26;
+  --accent: 122 118 104; --accent-soft: 240 239 234;
+
+  --g-radius: 2px;
+  --g-edge-w: 1px;
+  --g-edge-color: rgb(var(--primary) / 0.5);
+  /* Hazard-tape diagonal + horizontal streaks of ash */
+  --g-pattern:
+    repeating-linear-gradient(-45deg,
+      rgb(var(--primary) / 0.16) 0 11px, transparent 11px 27px),
+    repeating-linear-gradient(0deg,
+      rgb(var(--accent) / 0.10) 0 1px, transparent 1px 5px);
+  --g-vignette: radial-gradient(130% 110% at 50% -10%, transparent 42%, rgb(8 4 2 / 0.34) 100%);
+  --g-grain-op: 0.13;
+  /* Chipped corner — the sheet metal is no longer intact. */
+  --g-clip: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  --g-rule: repeating-linear-gradient(-45deg,
+    rgb(var(--primary) / 0.85) 0 7px, rgb(var(--bone-dim) / 0.35) 7px 14px);
+  --g-rule-h: 4px;
+  --g-label-stretch: 78%;
+  --g-label-weight: 800;
+  --g-label-tracking: 0.2em;
+}
+.dark [data-game="pz"] {
+  --primary: 228 118 66; --primary-strong: 240 146 98; --primary-soft: 48 26 16;
+  --primary-text: 240 152 106; --btn-primary: 206 96 48;
+  --accent: 152 146 130; --accent-soft: 42 40 34;
+  --g-vignette: radial-gradient(130% 110% at 50% -10%, transparent 38%, rgb(0 0 0 / 0.62) 100%);
+  --g-grain-op: 0.17;
+}
+
+/* ---------- Factorio — factory: steel plate, rivets, conveyor belt ---- */
+[data-game="factorio"] {
+  --primary: 200 112 18; --primary-strong: 172 94 10; --primary-soft: 252 236 216;
+  --primary-text: 164 90 8; --btn-primary: 184 102 14;
+  --accent: 92 108 126; --accent-soft: 230 234 239;
+
+  --g-radius: 0px;
+  --g-edge-w: 2px;
+  --g-edge-color: rgb(var(--primary) / 0.55);
+  /* Brushed steel (fine verticals) + conveyor arrows in running direction */
+  --g-pattern:
+    repeating-linear-gradient(115deg,
+      rgb(var(--primary) / 0.18) 0 4px, transparent 4px 11px,
+      rgb(var(--primary) / 0.07) 11px 15px, transparent 15px 26px),
+    repeating-linear-gradient(90deg,
+      rgb(var(--accent) / 0.14) 0 1px, transparent 1px 4px);
+  --g-vignette: linear-gradient(180deg, rgb(var(--accent) / 0.14), transparent 34%);
+  /* Rivets in the four corners — 10px from the edge. */
+  --g-corners:
+    radial-gradient(circle 2.5px at 10px 10px, rgb(var(--accent) / 0.75) 0 100%, transparent 100%),
+    radial-gradient(circle 2.5px at calc(100% - 10px) 10px, rgb(var(--accent) / 0.75) 0 100%, transparent 100%),
+    radial-gradient(circle 2.5px at 10px calc(100% - 10px), rgb(var(--accent) / 0.75) 0 100%, transparent 100%),
+    radial-gradient(circle 2.5px at calc(100% - 10px) calc(100% - 10px), rgb(var(--accent) / 0.75) 0 100%, transparent 100%);
+  --g-grain-op: 0.14;
+  --g-rule: repeating-linear-gradient(115deg,
+    rgb(var(--primary) / 0.9) 0 6px, transparent 6px 12px);
+  --g-rule-h: 5px;
+  --g-label-stretch: 116%;
+  --g-label-weight: 700;
+  --g-label-tracking: 0.24em;
+}
+.dark [data-game="factorio"] {
+  --primary: 238 158 62; --primary-strong: 246 178 96; --primary-soft: 48 32 12;
+  --primary-text: 246 180 100; --btn-primary: 210 132 40;
+  --accent: 142 160 180; --accent-soft: 28 34 42;
+  --g-grain-op: 0.18;
+}
+
+/* ---------- Minecraft — blocky: no radius, pixel steps, 8px grid ------ */
+[data-game="minecraft"] {
+  --primary: 72 146 44; --primary-strong: 56 122 32; --primary-soft: 229 243 221;
+  --primary-text: 52 114 28; --btn-primary: 62 130 36;
+  --accent: 124 92 56; --accent-soft: 240 231 220;
+
+  --g-radius: 0px;
+  --g-edge-w: 3px;
+  --g-edge-color: rgb(var(--primary) / 0.42);
+  --g-pattern:
+    linear-gradient(rgb(var(--primary) / 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--primary) / 0.13) 1px, transparent 1px);
+  --g-pattern-size: 8px 8px;
+  --g-vignette: none;
+  --g-grain-op: 0.04;
+  /* Stepped corners instead of rounding — 6px stairs. */
+  --g-clip: polygon(
+    0 6px, 6px 6px, 6px 0,
+    calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px,
+    100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+    6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
+  --g-rule: repeating-linear-gradient(90deg,
+    rgb(var(--primary) / 0.9) 0 8px, transparent 8px 16px);
+  --g-rule-h: 4px;
+  --g-label-stretch: 100%;
+  --g-label-weight: 700;
+  --g-label-tracking: 0.1em;
+}
+.dark [data-game="minecraft"] {
+  --primary: 122 190 88; --primary-strong: 146 208 114; --primary-soft: 24 42 18;
+  --primary-text: 150 210 120; --btn-primary: 96 166 66;
+  --accent: 176 138 92; --accent-soft: 38 32 22;
+}
+
+/* ---------- Vintage Story — rustic: paper, copper, soft edges --------- */
+[data-game="vintagestory"] {
+  --primary: 34 148 134; --primary-strong: 24 124 112; --primary-soft: 221 243 239;
+  --primary-text: 20 116 104; --btn-primary: 28 132 120;
+  --accent: 176 112 60; --accent-soft: 247 234 222;
+
+  --g-radius: 12px;
+  --g-edge-w: 1px;
+  --g-edge-color: rgb(var(--accent) / 0.42);
+  /* Paper fibre: two slanted hatchings + organic dots */
+  --g-pattern:
+    radial-gradient(rgb(var(--primary) / 0.16) 1px, transparent 1.7px),
+    repeating-linear-gradient(24deg, rgb(var(--accent) / 0.07) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(-71deg, rgb(var(--accent) / 0.05) 0 1px, transparent 1px 13px);
+  --g-pattern-size: 13px 13px, auto, auto;
+  --g-vignette: radial-gradient(120% 110% at 20% 0%, rgb(var(--accent) / 0.12), transparent 58%);
+  --g-grain-op: 0.16;
+  /* Hand-struck line: irregular dashes */
+  --g-rule: repeating-linear-gradient(90deg,
+    rgb(var(--accent) / 0.8) 0 13px, transparent 13px 17px,
+    rgb(var(--accent) / 0.5) 17px 23px, transparent 23px 29px);
+  --g-rule-h: 2px;
+  --g-label-stretch: 96%;
+  --g-label-weight: 600;
+  --g-label-tracking: 0.07em;
+  --g-label-transform: none;
+}
+.dark [data-game="vintagestory"] {
+  --primary: 82 194 176; --primary-strong: 114 210 194; --primary-soft: 16 44 40;
+  --primary-text: 124 214 198; --btn-primary: 62 168 152;
+  --accent: 202 146 92; --accent-soft: 44 34 22;
+  --g-grain-op: 0.12;
+}
+
+/* ---------- Arma Reforger — military: map grid, stencil --------------- */
+[data-game="arma_reforger"] {
+  --primary: 146 118 48; --primary-strong: 122 96 34; --primary-soft: 244 238 218;
+  --primary-text: 118 92 30; --btn-primary: 130 104 38;
+  --accent: 112 126 68; --accent-soft: 236 239 222;
+
+  --g-radius: 3px;
+  --g-edge-w: 1px;
+  --g-edge-color: rgb(var(--primary) / 0.45);
+  /* Map: coarse grid 24px, fine grid 6px */
+  --g-pattern:
+    linear-gradient(rgb(var(--primary) / 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--primary) / 0.14) 1px, transparent 1px),
+    linear-gradient(rgb(var(--accent) / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--accent) / 0.06) 1px, transparent 1px);
+  --g-pattern-size: 24px 24px, 24px 24px, 6px 6px, 6px 6px;
+  --g-vignette: linear-gradient(160deg, transparent 55%, rgb(var(--accent) / 0.14));
+  --g-grain-op: 0.08;
+  /* Bearing ticks in the corners */
+  --g-corners:
+    linear-gradient(90deg, rgb(var(--primary) / 0.85) 0 14px, transparent 14px),
+    linear-gradient(180deg, rgb(var(--primary) / 0.85) 0 14px, transparent 14px),
+    linear-gradient(270deg, rgb(var(--primary) / 0.85) 0 14px, transparent 14px),
+    linear-gradient(0deg, rgb(var(--primary) / 0.85) 0 14px, transparent 14px);
+  --g-rule: repeating-linear-gradient(90deg,
+    rgb(var(--primary) / 0.85) 0 2px, transparent 2px 10px);
+  --g-rule-h: 6px;
+  --g-label-stretch: 84%;
+  --g-label-weight: 700;
+  --g-label-tracking: 0.28em;
+}
+.dark [data-game="arma_reforger"] {
+  --primary: 196 168 92; --primary-strong: 214 190 118; --primary-soft: 42 36 16;
+  --primary-text: 214 190 118; --btn-primary: 172 146 74;
+  --accent: 154 170 100; --accent-soft: 36 40 22;
+}
+
+/* ---------- Valheim — carved: stone, bronze, notches ------------------ */
+[data-game="valheim"] {
+  --primary: 48 108 150; --primary-strong: 36 88 128; --primary-soft: 224 239 248;
+  --primary-text: 32 84 122; --btn-primary: 42 98 138;
+  --accent: 154 116 66; --accent-soft: 245 235 223;
+
+  --g-radius: 4px;
+  --g-edge-w: 2px;
+  --g-edge-color: rgb(var(--accent) / 0.5);
+  /* Stone: irregular blotches + horizontal chisel notches */
+  --g-pattern:
+    radial-gradient(ellipse 26px 12px at 18% 32%, rgb(var(--accent) / 0.12), transparent 70%),
+    radial-gradient(ellipse 34px 16px at 72% 68%, rgb(var(--primary) / 0.12), transparent 70%),
+    repeating-linear-gradient(0deg,
+      rgb(var(--accent) / 0.13) 0 2px, transparent 2px 22px),
+    repeating-linear-gradient(90deg,
+      rgb(var(--primary) / 0.07) 0 2px, transparent 2px 44px);
+  --g-vignette: radial-gradient(120% 120% at 50% 120%, rgb(var(--primary) / 0.16), transparent 62%);
+  --g-grain-op: 0.19;
+  --g-rule: repeating-linear-gradient(90deg,
+    rgb(var(--accent) / 0.9) 0 3px, transparent 3px 6px,
+    rgb(var(--accent) / 0.9) 6px 16px, transparent 16px 22px);
+  --g-rule-h: 3px;
+  --g-label-stretch: 90%;
+  --g-label-weight: 700;
+  --g-label-tracking: 0.36em;
+}
+.dark [data-game="valheim"] {
+  --primary: 108 168 210; --primary-strong: 138 190 226; --primary-soft: 14 32 46;
+  --primary-text: 142 194 228; --btn-primary: 84 146 188;
+  --accent: 192 152 98; --accent-soft: 40 32 22;
+  --g-grain-op: 0.22;
+}
+
+/* ---------- Avorion — HUD: star field, corner brackets, plasma -------- */
+[data-game="avorion"] {
+  --primary: 110 78 186; --primary-strong: 90 60 162; --primary-soft: 235 229 250;
+  --primary-text: 86 58 158; --btn-primary: 98 68 172;
+  --accent: 42 152 168; --accent-soft: 221 241 244;
+
+  --g-radius: 1px;
+  --g-edge-w: 1px;
+  --g-edge-color: rgb(var(--accent) / 0.5);
+  /* Two star fields of different density + fine scan lines */
+  --g-pattern:
+    radial-gradient(rgb(var(--accent) / 0.5) 0.9px, transparent 1.3px),
+    radial-gradient(rgb(var(--primary) / 0.42) 0.7px, transparent 1.1px),
+    repeating-linear-gradient(0deg,
+      rgb(var(--accent) / 0.05) 0 1px, transparent 1px 3px);
+  --g-pattern-size: 37px 37px, 19px 19px, auto;
+  --g-pattern-pos: 0 0, 12px 15px, 0 0;
+  --g-vignette: radial-gradient(110% 100% at 50% 50%, transparent 30%, rgb(6 4 16 / 0.32) 100%);
+  --g-grain-op: 0.05;
+  /* Corner brackets ⌐ ¬ — two strokes per corner */
+  --g-corners:
+    linear-gradient(90deg, rgb(var(--accent) / 0.9) 0 12px, transparent 12px),
+    linear-gradient(180deg, rgb(var(--accent) / 0.9) 0 12px, transparent 12px),
+    linear-gradient(270deg, rgb(var(--accent) / 0.9) 0 12px, transparent 12px),
+    linear-gradient(0deg, rgb(var(--accent) / 0.9) 0 12px, transparent 12px);
+  --g-rule: linear-gradient(90deg,
+    rgb(var(--accent) / 0.9) 0 22%, transparent 22% 26%,
+    rgb(var(--primary) / 0.7) 26% 100%);
+  --g-rule-h: 2px;
+  --g-label-stretch: 106%;
+  --g-label-weight: 500;
+  --g-label-tracking: 0.32em;
+}
+.dark [data-game="avorion"] {
+  --primary: 160 134 230; --primary-strong: 182 160 240; --primary-soft: 26 20 48;
+  --primary-text: 186 164 242; --btn-primary: 138 110 212;
+  --accent: 96 198 212; --accent-soft: 16 40 44;
+  --g-vignette: radial-gradient(110% 100% at 50% 50%, transparent 26%, rgb(0 0 0 / 0.5) 100%);
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-fg font-body antialiased;
+    min-height: 100vh;
+  }
+
+  /* A touch of grain over the whole app — only in dark mode, where it works.
+     Fixed, not scrolling, and invisible to the pointer. */
+  :root.dark body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--grain);
+    opacity: 0.028;
+    mix-blend-mode: overlay;
+  }
+  #root { position: relative; z-index: 1; }
+
+  /* Slim scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--ink-500)) transparent;
+  }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb {
+    background: rgb(var(--ink-500));
+    border-radius: 2px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--bone-dim));
+    background-clip: padding-box;
+  }
+
+  /* Focus stays visible and carries the server colour. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary) / 0.75);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Display heading (Archivo Variable, set bold and narrow). */
+  .text-stencil {
+    @apply font-display font-bold tracking-tight;
+    font-stretch: 92%;
+  }
+
+  /* Fine hazard stripe (warning). */
+  .warning-stripe {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgb(var(--rust) / 0.16) 0,
+      rgb(var(--rust) / 0.16) 10px,
+      transparent 10px,
+      transparent 22px
+    );
+  }
+
+  /* Round label (stamp). */
+  .stamp {
+    @apply inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide;
+  }
+
+  /* ---- Identity zone: the ONLY readers of the --g-* tokens ----------- */
+
+  /* Frame of the zone: edge shape, edge width, clipping. */
+  .g-surface {
+    position: relative;
+    isolation: isolate;
+    border-radius: var(--g-radius);
+    border: var(--g-edge-w) solid var(--g-edge-color);
+    clip-path: var(--g-clip);
+    background-color: rgb(var(--ink-800));
+  }
+  /* The four overlays. All absolute, all without pointer events. */
+  .g-layer { position: absolute; inset: 0; pointer-events: none; }
+  .g-pattern {
+    background-image: var(--g-pattern);
+    background-size: var(--g-pattern-size);
+    background-position: var(--g-pattern-pos);
+    opacity: var(--g-pattern-op);
+  }
+  .g-vignette { background-image: var(--g-vignette); }
+  .g-grain {
+    background-image: var(--grain);
+    opacity: var(--g-grain-op);
+    mix-blend-mode: overlay;
+  }
+  /* Corner ornament: four 16px tiles in the corners, content from --g-corners. */
+  .g-corners {
+    background-image: var(--g-corners);
+    background-repeat: no-repeat;
+    background-size: 16px 1.5px, 1.5px 16px, 16px 1.5px, 1.5px 16px;
+    background-position: left 6px top 6px, left 6px top 6px,
+                         right 6px bottom 6px, right 6px bottom 6px;
+  }
+  /* For Factorio they are rivets (radial dots across the full surface). */
+  [data-game="factorio"] .g-corners {
+    background-size: 100% 100%;
+    background-position: 0 0;
+  }
+  .g-content { position: relative; z-index: 1; }
+
+  /* Keyline of the game. */
+  .g-rule { height: var(--g-rule-h); background-image: var(--g-rule); }
+
+  /* Label of the zone — the typography IS half of the art style. */
+  .g-label {
+    font-family: theme("fontFamily.display");
+    font-stretch: var(--g-label-stretch);
+    font-weight: var(--g-label-weight);
+    letter-spacing: var(--g-label-tracking);
+    text-transform: var(--g-label-transform);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Bottom-sheet slide-in for mobile modals */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-sheet { animation: sheet-up 0.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+/* Subtle content fade on page change */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+/* Gentle online pulse (status dot) */
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(var(--toxic) / 0.5); }
+  70% { box-shadow: 0 0 0 6px rgb(var(--toxic) / 0); }
+}
+.animate-live { animation: live-pulse 2s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sheet, .animate-fade-in, .animate-live { animation: none; }
+}

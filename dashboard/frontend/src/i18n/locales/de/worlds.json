@@ -1,0 +1,22 @@
+{
+  "active": "wird geladen",
+  "empty": "Es liegt kein Spielstand da.",
+  "files_one": "{{count}} Datei",
+  "files_other": "{{count}} Dateien",
+  "note": "Ein Wechsel wird erst mit <strong>„Neu aufbauen“</strong> wirksam — die aktive Welt hängt an einer Container-Variablen, und ein Neustart übernimmt sie nicht.",
+  "remove.action": "Wegräumen",
+  "remove.activeReason": "Der Stand, der beim nächsten Start geladen wird, bleibt liegen — sonst startet der Server in eine Welt, die es nicht mehr gibt.",
+  "remove.confirm.body": "Der Stand wird beiseitegelegt, nicht gelöscht — er liegt danach in einem eigenen Ordner daneben. Zurückholen geht nur auf dem Host.",
+  "remove.confirm.title": "„{{name}}“ wegräumen?",
+  "remove.done": "„{{name}}“ beiseitegelegt.",
+  "remove.failed": "Wegräumen fehlgeschlagen",
+  "remove.title": "Wegräumen (verschoben, nicht gelöscht)",
+  "select.action": "Eintragen",
+  "select.already": "Dieser Stand ist bereits eingetragen.",
+  "select.confirm.body": "Der laufende Server wird dabei NICHT angefasst. Wirksam wird der Wechsel erst mit „Neu aufbauen“ — bis dahin läuft die alte Welt weiter, während hier schon die neue steht.",
+  "select.confirm.title": "„{{name}}“ als Welt eintragen?",
+  "select.done": "Eingetragen.",
+  "select.failed": "Wechsel fehlgeschlagen",
+  "sub": "Was auf der Platte liegt — und was beim nächsten Start geladen wird",
+  "title": "Welten"
+}

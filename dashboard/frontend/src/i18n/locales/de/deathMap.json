@@ -1,0 +1,8 @@
+{
+  "cell.deaths_one": "Zelle {{x}},{{y}} — {{count}} Todesfall ({{names}})",
+  "cell.deaths_other": "Zelle {{x}},{{y}} — {{count}} Todesfälle ({{names}})",
+  "cell.none": "Zelle {{x}},{{y}} — keine Todesfälle",
+  "empty": "Noch keine Todesfälle mit Koordinaten aufgezeichnet. Sie erscheinen hier, sobald wieder jemand spielt.",
+  "legend_one": "Ein Kästchen = eine Spielzelle (300×300 Kacheln). Ausschnitt {{minX}}–{{maxX}} × {{minY}}–{{maxY}}, {{count}} Todesfall. Je dunkler, desto öfter ist dort jemand gestorben.",
+  "legend_other": "Ein Kästchen = eine Spielzelle (300×300 Kacheln). Ausschnitt {{minX}}–{{maxX}} × {{minY}}–{{maxY}}, {{count}} Todesfälle. Je dunkler, desto öfter ist dort jemand gestorben."
+}

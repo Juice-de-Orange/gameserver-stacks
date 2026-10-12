@@ -1,0 +1,13 @@
+{
+  "chip.blocked": "Mods faulty",
+  "chip.ok": "Mods ok",
+  "chip.pending": "Unapplied changes",
+  "chip.warn": "Check mods",
+  "panel.active": "{{mods}} mod(s), {{maps}} map(s) active",
+  "panel.activePending": "{{mods}} mod(s), {{maps}} map(s) active · the draft differs: {{summary}}",
+  "panel.blocked_one": "{{count}} error in the running configuration",
+  "panel.blocked_other": "{{count}} errors in the running configuration",
+  "panel.ok": "The running mod configuration is fine.",
+  "panel.warn_one": "{{count}} note on the running configuration",
+  "panel.warn_other": "{{count}} notes on the running configuration"
+}

@@ -1,0 +1,17 @@
+// Strict type check for `src/lib` ONLY — the layer everything hangs on: `features.ts` decides on
+// every tab, `format.ts` on every number shown, `ws.ts` on every WebSocket address.
+//
+// Why not `strict: true` globally: the app grew with `strict: false` (tsconfig.json), and flipping
+// it turns the whole app red — an initiative of its own. In `src/lib` it costs nothing because no
+// React types reach into it. Better a small area that is really strict than a large one that is
+// strict in name only.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "include": ["src/lib"]
+}

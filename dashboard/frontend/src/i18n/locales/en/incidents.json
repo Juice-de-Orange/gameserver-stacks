@@ -1,0 +1,13 @@
+{
+  "empty": "No incidents recorded.",
+  "kind.auto_restart": "Restarted automatically",
+  "kind.backup_failed": "Backup failed — restart cancelled",
+  "kind.backup_quiesce_failed": "Backup without a world save",
+  "kind.boot_crash_loop": "Boot loop",
+  "kind.idle_autostop": "Stopped because idle",
+  "kind.rcon_hang": "Server hung",
+  "kind.recovered": "Reachable again",
+  "kind.restart_blocked": "Restart refused",
+  "kind.restart_failed": "Restart failed",
+  "title": "Incidents"
+}

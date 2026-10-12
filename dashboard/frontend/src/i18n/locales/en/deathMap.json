@@ -1,0 +1,8 @@
+{
+  "cell.deaths_one": "Cell {{x}},{{y}} — {{count}} death ({{names}})",
+  "cell.deaths_other": "Cell {{x}},{{y}} — {{count}} deaths ({{names}})",
+  "cell.none": "Cell {{x}},{{y}} — no deaths",
+  "empty": "No deaths with coordinates recorded yet. They show up here as soon as someone plays again.",
+  "legend_one": "One square = one game cell (300×300 tiles). Section {{minX}}–{{maxX}} × {{minY}}–{{maxY}}, {{count}} death. The darker, the more often someone died there.",
+  "legend_other": "One square = one game cell (300×300 tiles). Section {{minX}}–{{maxX}} × {{minY}}–{{maxY}}, {{count}} deaths. The darker, the more often someone died there."
+}

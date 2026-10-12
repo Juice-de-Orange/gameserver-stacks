@@ -1,0 +1,14 @@
+{
+  "field.publicHost": "Öffentliche Adresse",
+  "hint.publicHost": "Hostname oder IP-Adresse, zu der sich Spieler verbinden, ohne http:// und ohne Port (jeder Server hängt seinen eigenen Port an). Steht in der Flotte, auf der Seite jedes Servers und auf der Beitreten-Seite.",
+  "none": "Ohne öffentliche Adresse kann die Beitreten-Seite Spielern nicht sagen, wohin sie sich verbinden sollen.",
+  "perServer": "Ein Server kann eine eigene Adresse haben: auf seiner Bearbeiten-Seite setzen; sie gilt vor dieser.",
+  "saveFailed": "Die Adresse konnte nicht gespeichert werden.",
+  "saved": "Gespeichert.",
+  "source.env": "Aus PUBLIC_HOST in der Umgebung: {{value}}",
+  "source.none": "Nicht gesetzt.",
+  "source.stored": "Hier gespeichert.",
+  "subtitle": "Wie Spieler die Gameserver erreichen",
+  "title": "Netzwerk",
+  "useEnv": "Leeren (PUBLIC_HOST verwenden)"
+}

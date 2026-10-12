@@ -1,0 +1,21 @@
+{
+  "countdown.d": "{{d}} T",
+  "countdown.dh": "{{d}} T {{h}} Std",
+  "countdown.h": "{{h}} Std",
+  "countdown.hm": "{{h}} Std {{m}} Min",
+  "countdown.m": "{{m}} Min",
+  "countdown.now": "jeden Moment",
+  "duration.dh": "{{d}}T {{h}}Std",
+  "duration.hm": "{{h}}Std {{m}}Min",
+  "duration.m": "{{m}}Min",
+  "relative.days": "vor {{n}} T",
+  "relative.hours": "vor {{n}} Std",
+  "relative.minutes": "vor {{n}} Min",
+  "relative.now": "gerade eben",
+  "span.days_one": "{{n}} Tag",
+  "span.days_other": "{{n}} Tage",
+  "span.hours_one": "{{n}} Stunde",
+  "span.hours_other": "{{n}} Stunden",
+  "span.minutes_one": "{{n}} Minute",
+  "span.minutes_other": "{{n}} Minuten"
+}

@@ -1,0 +1,12 @@
+{
+  "addFirst": "Ersten Server hinzufügen",
+  "admin": "Zum Start einen Spielserver hinzufügen: Spiel wählen, vorgeschlagene Werte prüfen, anlegen.",
+  "games.body": "Wähle die Spiele, die diese Installation betreibt. Nur sie bekommen Vorlagen und Downloads; ändern kannst du das später unter Einstellungen → Spiele.",
+  "games.change": "Spiele ändern",
+  "games.continue": "Weiter",
+  "games.later": "Noch wird nichts heruntergeladen — die Dateien eines Spiels kommen mit seinem ersten Server.",
+  "games.saveFailed": "Speichern der Spiele fehlgeschlagen.",
+  "games.title": "Welche Spiele willst du betreiben?",
+  "member": "Ein Admin hat noch keinen Spielserver eingerichtet.",
+  "title": "Noch kein Spielserver"
+}

@@ -1,0 +1,10 @@
+{
+  "column.action": "Aktion",
+  "column.detail": "Detail",
+  "column.target": "Ziel",
+  "column.time": "Zeit",
+  "column.user": "Nutzer",
+  "empty": "Keine Einträge.",
+  "subtitle": "Kritische Aktionen & Konsolenbefehle",
+  "title": "Audit-Log"
+}

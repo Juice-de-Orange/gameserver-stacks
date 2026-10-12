@@ -1,0 +1,8 @@
+{
+  "download": "Download",
+  "state.disconnected": "disconnected",
+  "state.live": "live",
+  "subtitle": "Live tail",
+  "title": "Logs",
+  "waiting": "Waiting for logs…"
+}

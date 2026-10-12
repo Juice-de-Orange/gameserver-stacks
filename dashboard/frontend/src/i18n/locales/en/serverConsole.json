@@ -1,0 +1,14 @@
+{
+  "input": "Enter a command…",
+  "noServer": "No server selected.",
+  "send": "Send",
+  "state.connected": "connected",
+  "state.disconnected": "disconnected",
+  "subtitle": "Live console",
+  "title": "Console",
+  "vsMod.guide": "Set-up guide",
+  "vsMod.howTo": "Install “Vintage RCON” into the server's Mods folder and start the server once: the mod writes ModConfig/vsrcon.json. The dashboard never shows the stored console password, so choose a new one and set it in both places: stop the server, enter it as “Password” in vsrcon.json, enter the same value on this server's edit page under “Console password” → “New password”, then start the server. If that card says the password comes from an env variable, put that variable's value into vsrcon.json instead. The set-up guide has the steps.",
+  "vsMod.modPage": "The mod on the Vintage Story mod database",
+  "vsMod.title": "The console needs a server mod",
+  "waiting": "Waiting for input…"
+}

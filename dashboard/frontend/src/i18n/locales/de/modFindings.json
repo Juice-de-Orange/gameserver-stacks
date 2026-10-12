@@ -1,0 +1,16 @@
+{
+  "heading": "Sicherheits-Prüfung",
+  "locked": "Solange ein Fehler offen ist, bleibt „Anwenden\" gesperrt. Das ist Absicht: genau diese Konfigurationen haben den Server bisher zerlegt.",
+  "none": "Keine Beanstandungen — dieser Entwurf lässt sich gefahrlos anwenden.",
+  "why.BASE_MAP_MISSING": "Ohne Grundkarte lösen die Vanilla-Verweise der Mod-Karten nicht auf.",
+  "why.BASE_MAP_NOT_LAST": "Die Grundkarte muss zuletzt geladen werden, sonst überdeckt sie die Mod-Karten.",
+  "why.BUILD41_ONLY": "Build-41-Mods laufen auf Build 42 nicht — die Dateien sind da, passen aber nicht.",
+  "why.MAP_CELL_CONFLICT": "Zwei Karten können nicht am selben Ort liegen. Die später geladene überschreibt die andere — das erzeugt halbe Gebäude und Abstürze.",
+  "why.MAP_WITHOUT_PROVIDER": "Der Server sucht beim Start nach Kacheln, die es nicht gibt. Genau dieser Fall hat den Server bisher beim Beitreten sterben lassen.",
+  "why.MISSING_DEPENDENCY": "Fehlt eine benötigte Mod, bricht der Start ab.",
+  "why.ORPHAN_MAP_DOWNLOAD": "Project Zomboid lädt heruntergeladene Karten automatisch — auch nicht aktivierte. Beim Anwenden wird der Download deshalb in die Quarantäne verschoben.",
+  "why.WORKSHOP_DIR_UNREADABLE": "Ohne Einblick ins Mod-Verzeichnis lässt sich nichts prüfen. Es wird bewusst nichts angewendet, statt auf gut Glück zu starten.",
+  "why.WORLD_MAP_REMOVED": "Die Welt hat für diese Karte bereits Gelände gespeichert. Diese Bereiche werden beim Anwenden in die Quarantäne verschoben und neu erzeugt — der Rest der Welt bleibt unangetastet.",
+  "worldReset_one": "Beim Anwenden wird {{count}} Weltdatei der entfallenden Karten in die Quarantäne verschoben — umkehrbar, der Rest der Welt bleibt erhalten.",
+  "worldReset_other": "Beim Anwenden werden {{count}} Weltdateien der entfallenden Karten in die Quarantäne verschoben — umkehrbar, der Rest der Welt bleibt erhalten."
+}

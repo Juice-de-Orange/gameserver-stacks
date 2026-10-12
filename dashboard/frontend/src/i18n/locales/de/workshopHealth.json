@@ -1,0 +1,23 @@
+{
+  "allAvailable": "Alle {{n}} Workshop-Items sind abrufbar.",
+  "cleanup.confirm.body_one": "{{count}} Mod ist auf dem Workshop nachweislich nicht mehr abrufbar. Sie wird aus dem ENTWURF genommen — am laufenden Server ändert sich dadurch nichts. Erst „Anwenden“ überträgt es, mit Pflicht-Backup, Quarantäne und Rückweg.",
+  "cleanup.confirm.body_other": "{{count}} Mods sind auf dem Workshop nachweislich nicht mehr abrufbar. Sie werden aus dem ENTWURF genommen — am laufenden Server ändert sich dadurch nichts. Erst „Anwenden“ überträgt es, mit Pflicht-Backup, Quarantäne und Rückweg.",
+  "cleanup.confirm.title": "Nicht mehr abrufbare Mods aus dem Entwurf nehmen?",
+  "cleanup.done_one": "{{count}} Mod aus dem Entwurf genommen — „Anwenden“ überträgt es.",
+  "cleanup.done_other": "{{count}} Mods aus dem Entwurf genommen — „Anwenden“ überträgt es.",
+  "cleanup.failed": "Aufräumen fehlgeschlagen",
+  "cleanup.label": "Aus dem Entwurf nehmen",
+  "cleanup.nothing": "Nichts zu entfernen.",
+  "incomplete": "Der Abgleich war <strong>unvollständig</strong> — Steam war nicht erreichbar oder hat unklar geantwortet. Das ist eine Aussage über die Prüfung, nicht über die Mods. Aufräumen ist deshalb gesperrt.",
+  "listUnreadable": "Die Mod-Liste ist nicht lesbar — es wurde <strong>nichts</strong> geprüft. Diese Karte sagt hier bewusst nichts aus.",
+  "loading": "Workshop-Abgleich läuft…",
+  "recheck.button": "Neu prüfen",
+  "recheck.title": "Jetzt neu bei Steam nachfragen",
+  "removed.badge": "weg",
+  "removed.explain": "Beitretende Spieler können sie nicht mehr laden und bleiben im Beitritt hängen. Wer sie noch im lokalen Cache hat, kommt weiterhin rein — deshalb fällt das oft erst auf, wenn jemand Neues beitreten will.",
+  "removed.heading_one": "{{count}} Mod ist nicht mehr abrufbar",
+  "removed.heading_other": "{{count}} Mods sind nicht mehr abrufbar",
+  "title": "Workshop-Abgleich",
+  "unverifiable.explain": "Kein Urteil — weder gut noch schlecht. Diese Items werden vom Aufräumen ausdrücklich nicht angefasst.",
+  "unverifiable.heading": "{{n}} nicht prüfbar"
+}

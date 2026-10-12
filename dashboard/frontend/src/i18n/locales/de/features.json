@@ -1,0 +1,10 @@
+{
+  "reason.actions.arma_reforger": "Arma Reforger kennt über die Server-Konsole nur Spielerliste, Kick und Bann. Spawnen, Teleport und Wetter gibt es dort ausschließlich im Spiel über das Game-Master-Menü — trag dich dafür unter Konfiguration → Admins ein.",
+  "reason.actions.valheim": "Valheim hat keine fernsteuerbare Konsole — weder RCON noch stdin. Spielleitung geht nur im Spiel selbst (F5), und dafür musst du unter Konfiguration als Admin eingetragen sein. Bannen und Freigeben laufen trotzdem über die Moderation.",
+  "reason.console.default": "Dieser Server hat keine steuerbare Konsole.",
+  "reason.console.valheim": "Der dedizierte Valheim-Server hat keine fernsteuerbare Konsole — kein RCON, kein stdin. Das ist keine fehlende Einrichtung, sondern eine Eigenschaft des Spiels. Spielerzahl und Version kommen über die Steam-Abfrage, Bannen über die Listen-Dateien.",
+  "reason.join.noPort": "Dieser Server hat keinen nach außen veröffentlichten Spiel-Port.",
+  "reason.noServer": "Kein Server ausgewählt.",
+  "reason.unrecorded": "Für {{game}} nicht verfügbar — der Grund ist nicht hinterlegt, bitte melden.",
+  "reason.version.default": "Dieser Server meldet keine Versionsverwaltung."
+}

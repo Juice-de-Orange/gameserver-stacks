@@ -1,0 +1,12 @@
+{
+  "activated": "{{game}} ist jetzt aktiv.",
+  "deactivated": "{{game}} ist jetzt inaktiv.",
+  "intro": "Nur aktive Spiele erscheinen beim Anlegen eines Servers, bei Versionsabfragen und bei Mod-Downloads. Von einem inaktiven Spiel wird nichts heruntergeladen. Ein Spiel mit einem eingeschalteten Server lässt sich nicht abschalten.",
+  "none": "Noch ist kein Spiel aktiv. Schalte die Spiele ein, die du betreiben willst.",
+  "saveFailed": "Speichern fehlgeschlagen.",
+  "state.active": "Aktiv",
+  "state.inactive": "Inaktiv",
+  "subtitle": "Welche Spiele diese Installation betreibt",
+  "title": "Spiele",
+  "toggle": "{{game}} auf dieser Installation betreiben"
+}

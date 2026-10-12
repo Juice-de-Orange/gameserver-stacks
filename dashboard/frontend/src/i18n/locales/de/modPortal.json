@@ -1,0 +1,21 @@
+{
+  "install.done": "„{{file}}“ geladen — deaktiviert abgelegt, wie jeder Upload.",
+  "install.failed": "Installieren fehlgeschlagen",
+  "result.downloads": "{{owner}} · {{downloads}} Downloads",
+  "result.forVersion": "für {{version}}",
+  "result.install": "Installieren",
+  "search.empty": "Nichts gefunden.",
+  "search.note": "Das Portal kann selbst nicht suchen — der Katalog wird dafür ganz geladen und hier gefiltert. Deshalb dauert es einen Moment.",
+  "search.placeholder": "Mod suchen…",
+  "search.tooShort": "Bitte mindestens zwei Zeichen suchen.",
+  "sub": "Suchen, laden und Aktualisierungen sehen",
+  "title": "Mod-Portal",
+  "updates.allCurrent": "Alles aktuell.",
+  "updates.allCurrentUnknown": "Alles aktuell ({{n}} nicht prüfbar).",
+  "updates.download": "Laden",
+  "updates.error": "Aktualisierungen nicht abrufbar: {{error}}",
+  "updates.heading": "Aktualisierungen",
+  "updates.notChecked": "Nicht nachgesehen — siehe Fehler oben. Das ist etwas anderes als „alles aktuell“.",
+  "updates.unknown_one": "{{count}} Mod kennt das Portal nicht (Eigenbau oder umbenannt): <names>{{names}}</names>. Ob sie aktuell ist, lässt sich von hier aus nicht sagen.",
+  "updates.unknown_other": "{{count}} Mods kennt das Portal nicht (Eigenbau oder umbenannt): <names>{{names}}</names>. Ob sie aktuell sind, lässt sich von hier aus nicht sagen."
+}

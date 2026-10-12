@@ -1,0 +1,13 @@
+{
+  "empty": "Keine Vorfälle aufgezeichnet.",
+  "kind.auto_restart": "Automatisch neugestartet",
+  "kind.backup_failed": "Backup fehlgeschlagen — Neustart abgebrochen",
+  "kind.backup_quiesce_failed": "Backup ohne Welt-Save",
+  "kind.boot_crash_loop": "Startschleife",
+  "kind.idle_autostop": "Wegen Leerlauf gestoppt",
+  "kind.rcon_hang": "Server hing",
+  "kind.recovered": "Wieder erreichbar",
+  "kind.restart_blocked": "Neustart abgelehnt",
+  "kind.restart_failed": "Neustart fehlgeschlagen",
+  "title": "Vorfälle"
+}

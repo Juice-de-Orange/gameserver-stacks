@@ -1,0 +1,4 @@
+{
+  "games.has_servers": "Game '{{game}}' still has enabled servers: {{servers}}. Disable them first.",
+  "games.inactive": "Game '{{game}}' is not active on this installation. Activate it under Settings → Games first."
+}

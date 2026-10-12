@@ -1,0 +1,22 @@
+{
+  "activity.title": "Aktivität (Wochentag × Stunde)",
+  "empty": "Noch keine bestätigte Verknüpfung — sobald ein Admin sie freigibt, erscheinen hier deine Stats.",
+  "event.death": "Tod",
+  "event.kill": "Kill",
+  "event.levelUp": "Level",
+  "events.title": "Ereignisse",
+  "link.game": "Spiel",
+  "link.intro": "Verknüpfe deinen In-Game-Namen, damit hier deine eigenen Stats erscheinen. Ein Admin bestätigt die Verknüpfung.",
+  "link.name": "In-Game-Name",
+  "link.pending": "wartet auf Bestätigung",
+  "link.requested": "Verknüpfung beantragt — ein Admin bestätigt sie.",
+  "link.submit": "Verknüpfen",
+  "link.title": "In-Game-Name verknüpfen",
+  "link.verified": "verifiziert",
+  "subtitle": "Deine eigene Spielzeit & Aktivität",
+  "summary.avgSession": "Ø Session",
+  "summary.daysActive": "Aktive Tage",
+  "summary.playtime": "Spielzeit",
+  "summary.sessions": "Sessions",
+  "title": "Meine Stats"
+}

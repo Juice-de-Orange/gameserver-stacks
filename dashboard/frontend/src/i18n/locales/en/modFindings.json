@@ -1,0 +1,16 @@
+{
+  "heading": "Safety check",
+  "locked": "As long as an error is open, “Apply” stays locked. That is intentional: these are exactly the configurations that break the server.",
+  "none": "No findings — this draft can be applied safely.",
+  "why.BASE_MAP_MISSING": "Without the base map the vanilla references of the mod maps do not resolve.",
+  "why.BASE_MAP_NOT_LAST": "The base map must be loaded last, otherwise it covers the mod maps.",
+  "why.BUILD41_ONLY": "Build 41 mods do not run on Build 42 — the files are there, but they do not fit.",
+  "why.MAP_CELL_CONFLICT": "Two maps cannot occupy the same place. The one loaded later overwrites the other — that produces half buildings and crashes.",
+  "why.MAP_WITHOUT_PROVIDER": "At start the server looks for tiles that do not exist. This is exactly the case that makes the server die when a player joins.",
+  "why.MISSING_DEPENDENCY": "If a required mod is missing, the start aborts.",
+  "why.ORPHAN_MAP_DOWNLOAD": "Project Zomboid loads downloaded maps automatically — even ones that are not enabled. That is why the download is moved into quarantine when applying.",
+  "why.WORKSHOP_DIR_UNREADABLE": "Without a view into the mod directory nothing can be checked. Deliberately nothing is applied, instead of starting on a hunch.",
+  "why.WORLD_MAP_REMOVED": "The world has already saved terrain for this map. When applying, these areas are moved into quarantine and generated anew — the rest of the world stays untouched.",
+  "worldReset_one": "When applying, {{count}} world file of the maps that are dropped is moved into quarantine — reversible, the rest of the world is kept.",
+  "worldReset_other": "When applying, {{count}} world files of the maps that are dropped are moved into quarantine — reversible, the rest of the world is kept."
+}

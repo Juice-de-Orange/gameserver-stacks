@@ -1,0 +1,11 @@
+{
+  "backToLogin": "Zurück zum Login",
+  "error.failed": "Registrierung fehlgeschlagen",
+  "error.unreachable": "Server nicht erreichbar — bitte später erneut versuchen.",
+  "field.displayName": "Anzeigename",
+  "field.password": "Passwort (min. 8 Zeichen)",
+  "field.username": "Benutzername",
+  "received": "Registrierung eingegangen — ein Admin muss dich freigeben.",
+  "submit": "Registrieren",
+  "title": "Registrieren"
+}

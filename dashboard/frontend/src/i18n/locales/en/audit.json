@@ -1,0 +1,10 @@
+{
+  "column.action": "Action",
+  "column.detail": "Detail",
+  "column.target": "Target",
+  "column.time": "Time",
+  "column.user": "User",
+  "empty": "No entries.",
+  "subtitle": "Critical actions & console commands",
+  "title": "Audit log"
+}

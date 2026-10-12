@@ -1,0 +1,11 @@
+{
+  "action.restart": "Restart",
+  "action.start": "Start",
+  "action.stop": "Stop",
+  "manage.console": "Console",
+  "manage.edit": "Edit server",
+  "manage.resources": "Resources",
+  "manage.title": "Management",
+  "manage.version": "Version",
+  "noServer": "No server selected."
+}

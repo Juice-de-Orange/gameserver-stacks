@@ -1,0 +1,14 @@
+{
+  "field.publicHost": "Public address",
+  "hint.publicHost": "Host name or IP address players connect to, without http:// and without a port (each server adds its own port). Shown on the fleet, on each server's page and on the join page.",
+  "none": "Without a public address the join page cannot tell players where to connect.",
+  "perServer": "A server can have its own address: set it on that server's edit page; it wins over this one.",
+  "saveFailed": "The address could not be saved.",
+  "saved": "Saved.",
+  "source.env": "From PUBLIC_HOST in the environment: {{value}}",
+  "source.none": "Not set.",
+  "source.stored": "Saved here.",
+  "subtitle": "How players reach the game servers",
+  "title": "Network",
+  "useEnv": "Clear (use PUBLIC_HOST)"
+}
