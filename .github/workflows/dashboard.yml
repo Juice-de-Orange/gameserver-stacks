@@ -1,0 +1,157 @@
+name: dashboard
+
+# Stacks Console (dashboard/): backend lint + tests, frontend checks + tests + build, the compose
+# file with both console images, the helper images (build only), and the firewall helper against a
+# real iptables in a throw-away network namespace. Also called by release-images.yml before it
+# publishes.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dashboard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    # Same image as dashboard/backend/Dockerfile.
+    name: backend (ruff + pytest)
+    runs-on: ubuntu-latest
+    container: python:3.12-slim
+    services:
+      # Throw-away database for the `pg` tests (migrations that SQLite cannot run).
+      pg:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: x
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: dashboard/backend
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PIP_ROOT_USER_ACTION: ignore
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+      - name: Lint
+        run: python -m ruff check .
+      - name: Tests
+        run: python -m pytest -p no:cacheprovider
+      - name: Migration tests against Postgres
+        # The `pg` tests skip themselves when no database answers, so a skip must fail here.
+        env:
+          PG_TEST_URL: postgresql+psycopg://postgres:x@pg:5432/postgres
+        run: |
+          python -m pytest -p no:cacheprovider -m pg --junitxml=/tmp/pg.xml
+          python - <<'EOF'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("/tmp/pg.xml").getroot()
+          suite = root if root.tag == "testsuite" else root.find("testsuite")
+          tests, skipped = int(suite.get("tests")), int(suite.get("skipped"))
+          print(f"pg tests: {tests}, skipped: {skipped}")
+          raise SystemExit(0 if tests > 0 and skipped == 0 else 1)
+          EOF
+
+  frontend:
+    # Same image as the build stage of dashboard/frontend/Dockerfile.
+    name: frontend (typecheck + vitest + build)
+    runs-on: ubuntu-latest
+    container: node:20-alpine
+    defaults:
+      run:
+        working-directory: dashboard/frontend
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run typecheck:lib
+      - run: npm test
+      - run: npm run build
+
+  compose:
+    # The compose file must validate with the template's values plus secrets, must refuse to
+    # start without them (fail-closed), and both console images must build from this checkout.
+    name: compose check + image build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: docker compose version
+      - name: Env file through ./setup (the documented quick start)
+        run: |
+          ./setup
+          cp .env "$RUNNER_TEMP/ci.env"
+          # Every secret the stack needs must have been generated (fails if setup misses one).
+          test "$(grep -cE '^(POSTGRES_PASSWORD|JWT_SECRET|GSS_SECRET_KEY|SEED_ADMIN_PASSWORD)=[0-9a-f]{24,}$' "$RUNNER_TEMP/ci.env")" = 4
+      - name: Validate with values
+        run: docker compose --env-file "$RUNNER_TEMP/ci.env" config --quiet
+      - name: Refuse without values
+        run: |
+          if docker compose --env-file /dev/null config --quiet; then
+            echo "docker-compose.yml validates without POSTGRES_PASSWORD; it must fail closed" >&2
+            exit 1
+          fi
+      - name: Build both console images
+        run: docker compose --env-file "$RUNNER_TEMP/ci.env" build console-api console-web
+
+  helper-images:
+    # The images release-images.yml publishes besides the two console images: build them from this
+    # checkout so a broken Dockerfile shows up on the pull request, not on the release tag. Build
+    # only, nothing is pushed; amd64 only (the runner's own platform).
+    name: build ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: stacks-console-firewall
+            context: dashboard/firewall
+          - image: stacks-console-steamcmd
+            context: dashboard/images/steamcmd
+          - image: stacks-console-vintagestory-runner
+            context: dashboard/images/vintagestory
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Build
+        env:
+          IMAGE: ${{ matrix.image }}
+          CONTEXT: ${{ matrix.context }}
+        run: docker build -t "$IMAGE:ci" "$CONTEXT"
+
+  firewall-netns:
+    # End-to-end check of the firewall helper (dashboard/firewall/netns-check.sh): builds the
+    # helper image and runs tests/netns_check.py in a container with `--network none`, every
+    # capability dropped except NET_ADMIN, and no-new-privileges. Nothing privileged: NET_ADMIN
+    # covers the container's own network namespace only, so the runner's firewall is never read
+    # or written. The script refuses to run in any other container mode.
+    name: firewall helper (netns check)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: sh dashboard/firewall/netns-check.sh

@@ -1,0 +1,16 @@
+name: Question
+description: Ask how to set something up or why it behaves the way it does.
+labels: [question]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What do you want to do, and what did you try? Links to the docs section you read help.
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: Host
+      description: OS, CPU architecture, `docker compose version` (if it matters for the question).

@@ -1,0 +1,118 @@
+name: release images
+
+# On a release tag (v1.2.3, v1.2.3-rc.1): run the dashboard checks, then build and push the
+# Stacks Console images to GHCR. Tag pushes only come from this repository (a fork's pull request
+# never triggers this workflow), and the publish job is skipped in forks.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/dashboard.yml
+
+  publish:
+    name: publish ${{ matrix.image }}
+    needs: checks
+    if: github.repository_owner == 'Juice-de-Orange'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: stacks-console-api
+            context: dashboard/backend
+            platforms: linux/amd64,linux/arm64
+            latest: auto
+            alias: ""
+            description: Stacks Console API (FastAPI backend of the gameserver-stacks web dashboard)
+          - image: stacks-console-web
+            context: dashboard/frontend
+            platforms: linux/amd64,linux/arm64
+            latest: auto
+            alias: ""
+            description: Stacks Console web UI (Caddy serving the SPA and proxying the API)
+          # Opt-in firewall helper (compose profile `firewall`); versioned like api and web
+          # (`GSS_VERSION`). Python standard library and Alpine's iptables, both on arm64 too.
+          - image: stacks-console-firewall
+            context: dashboard/firewall
+            platforms: linux/amd64,linux/arm64
+            latest: auto
+            alias: ""
+            description: Firewall helper of Stacks Console (opens the published game ports in DOCKER-USER)
+          # The dashboard defaults to `stacks-console-steamcmd:1` (backend/app/config.py), so this
+          # image carries `1` instead of `latest`. amd64 only: steamcmd has no ARM build.
+          - image: stacks-console-steamcmd
+            context: dashboard/images/steamcmd
+            platforms: linux/amd64
+            latest: "false"
+            alias: "1"
+            description: steamcmd helper of Stacks Console (downloads one Steam Workshop item)
+          # amd64 only: the official Vintage Story server download is linux-x64 and ships x86_64
+          # native libraries (e_sqlite3, zstd), so an arm64 image would build but not run the game.
+          # Like steamcmd it carries `1` instead of `latest`: the dashboard's preset defaults to
+          # `stacks-console-vintagestory-runner:1` (backend/app/config.py, GSS_VS_RUNNER_IMAGE).
+          - image: stacks-console-vintagestory-runner
+            context: dashboard/images/vintagestory
+            platforms: linux/amd64
+            latest: "false"
+            alias: "1"
+            description: Vintage Story server runner of Stacks Console (fetches the version in VERSION at start)
+    env:
+      DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+    steps:
+      - name: Check the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Tag '$TAG' is not a release version (v<major>.<minor>.<patch>[-<pre>])" >&2
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        if: contains(matrix.platforms, 'arm64')
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/juice-de-orange/${{ matrix.image }}
+          # `latest` (auto) and the alias go on releases only, never on pre-releases.
+          flavor: latest=${{ matrix.latest }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=${{ matrix.alias || 'none' }},enable=${{ matrix.alias != '' && !contains(github.ref_name, '-') }}
+          labels: |
+            org.opencontainers.image.title=${{ matrix.image }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.licenses=MIT
+          annotations: |
+            org.opencontainers.image.title=${{ matrix.image }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.licenses=MIT
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          platforms: ${{ matrix.platforms }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}

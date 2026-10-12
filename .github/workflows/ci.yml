@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
       - name: Lint shell scripts
         run: |
-          mapfile -t files < <(git ls-files stack '*.sh')
+          mapfile -t files < <(git ls-files stack '*.sh' dashboard/setup)
           docker run --rm -v "$PWD:/mnt:ro" -w /mnt koalaman/shellcheck:v0.11.0 "${files[@]}"
 
   secrets:

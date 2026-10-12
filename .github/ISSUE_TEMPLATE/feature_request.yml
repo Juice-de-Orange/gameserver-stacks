@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest an improvement to the dashboard or a game block.
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: part
+    attributes:
+      label: Part
+      options:
+        - Stacks Console (dashboard)
+        - A game block
+        - stack helper / repository
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that is hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How could it work? For a new game, use the "New game" form instead.
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to work on this myself.

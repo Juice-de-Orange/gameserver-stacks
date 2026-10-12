@@ -1,12 +1,13 @@
 name: Bug report
-description: A block does not start, does not save, or the docs are wrong.
+description: The dashboard or a game block does not work as documented, or the docs are wrong.
 labels: [bug]
 body:
   - type: dropdown
     id: game
     attributes:
-      label: Game
+      label: Part
       options:
+        - Stacks Console (dashboard)
         - Project Zomboid
         - Minecraft
         - Vintage Story
@@ -20,8 +21,8 @@ body:
   - type: input
     id: tag
     attributes:
-      label: Image tag
-      description: The value of the *_TAG variable in your .env (or "default").
+      label: Version
+      description: Dashboard - the commit or release (`git describe --tags --always`); a block - its *_TAG value (or "default").
     validations:
       required: true
   - type: textarea
@@ -35,7 +36,7 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. cp .env.example .env, set …
+        1. cd dashboard && ./setup
         2. docker compose up -d
         3. …
     validations:

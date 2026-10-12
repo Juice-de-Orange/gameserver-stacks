@@ -1,3 +1,5 @@
+# Blank issues are off: bugs, features, questions and new games each have a form. Add a contact
+# link to GitHub Discussions here once Discussions are enabled for the repository.
 blank_issues_enabled: false
 contact_links:
   - name: Report a security vulnerability
