@@ -19,7 +19,11 @@ docker compose logs -f valheim
 
 The first start downloads the server from Steam (`data/server` held 4.1 GB afterwards in our test
 run, about 4 minutes including world generation) and then generates the world.
-The server is ready when the log shows `Game server connected` and `docker compose ps` reports the container as `healthy`.
+The server is ready when the log shows `Opened Steam server` and `docker compose ps` reports the
+container as `healthy`. On the first start of a new world `Game server connected` comes earlier,
+while the world is still being generated: we measured 76 s between the two lines, and the Steam
+query (server browser, player count) answered only from `Opened Steam server` on. A restart of an
+existing world logs both within a second.
 
 Connect in the game with **Join Game → Join IP** and the host's address, e.g. `203.0.113.10`.
 With the default port the port can be left out; with another port add it: `example.com:2556`.
