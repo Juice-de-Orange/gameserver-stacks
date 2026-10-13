@@ -34,6 +34,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi import HTTPException
 
+from app.config import settings
 from app.services import restarts, watchdog
 from app.services.rcon import RconError
 
@@ -140,7 +141,7 @@ def test_a_refused_restart_is_not_a_failure(monkeypatch):
     kinds = [a[0] for a in incidents]
     assert "restart_failed" not in kinds, "a refusal is not a failure"
     assert "restart_blocked" in kinds
-    assert st.last_restart == 0.0, "no cooldown for an intervention that never happened"
+    assert st.last_restart is None, "no cooldown for an intervention that never happened"
     assert st.fail_count == 3, "the counter must not be cleared — the server is still hanging"
 
 
@@ -158,6 +159,29 @@ def test_the_silence_after_the_autoheal_does_not_shorten_another_one(monkeypatch
 
     remaining = (st.suppress_until - time.monotonic()) / 60.0
     assert remaining > 20, f"the longer silence was thrown away ({remaining:.1f} min)"
+
+
+def test_a_fresh_host_is_not_in_a_cooldown(monkeypatch):
+    """`time.monotonic()` counts from the host's boot. With "never restarted" stored as `0.0`,
+    the first twenty minutes after a host boot looked like the cooldown after an autoheal that
+    never happened, and a hanging server stayed hung (a CI runner six minutes after its boot
+    showed it: no restart, no incident)."""
+    incidents.clear()
+    monkeypatch.setattr(settings, "watchdog_cooldown_min", 20)
+    monkeypatch.setattr(watchdog, "time", SimpleNamespace(monotonic=lambda: 360.0, time=time.time))
+    st = watchdog._state("pz-1")
+    st.fail_count = 2
+    restarted = []
+
+    async def _restart(server):
+        restarted.append(server.key)
+    import app.services.lifecycle as real
+    monkeypatch.setattr(real, "restart_server", _restart)
+    _run(monkeypatch, _srv(), _DeadRcon(), _docker_state())
+
+    assert restarted == ["pz-1"], "the third dead answer restarts, whatever the host's uptime"
+    assert "auto_restart" in [a[0] for a in incidents]
+    assert st.last_restart == 360.0
 
 
 def test_the_silence_as_a_block_withdraws_itself():

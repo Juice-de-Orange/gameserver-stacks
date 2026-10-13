@@ -223,7 +223,11 @@ def test_fixed_ports_are_not_passed_to_the_container(game):
     assert not numbers & set(env.values())
 
 
-def test_factorio_preset_is_the_rootless_image():
+def test_factorio_preset_is_the_rootless_image(monkeypatch):
+    # The driver answers with the API process's own ids (`APP_UID`, 1000 in the image); pin them
+    # so the answer does not depend on who runs pytest (root in the CI container).
+    monkeypatch.setattr("os.getuid", lambda: 1000)
+    monkeypatch.setattr("os.getgid", lambda: 1000)
     p = _preset(GameType.factorio)
     row = _row(_body(p, "fac", settings.data_root))
     assert get_driver(row).container_user(row) == "1000:1000"

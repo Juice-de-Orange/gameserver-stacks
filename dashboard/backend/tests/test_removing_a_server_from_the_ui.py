@@ -6,6 +6,7 @@ key was typed, "keep data" leaves every file in place, "delete data" deletes exa
 server's folder and nothing that another row uses, and the audit entry outlives the row.
 """
 import asyncio
+import errno
 import os
 
 import pytest
@@ -234,9 +235,30 @@ def test_files_that_cannot_be_deleted_keep_the_row(mem_engine, world, monkeypatc
     assert len(_rows(mem_engine)[0]) == 1, "the row must stay so the admin can retry"
 
 
-def _root_owned(data):
+def _with_the_apis_rights(monkeypatch):
+    """Delete with the rights of the API (`APP_UID`), whoever runs pytest.
+
+    Root (the CI container) may delete in a folder without write permission, so the folder
+    below would not stop it and the cleanup helper would never be asked. The kernel's rule for
+    a non-root process is played here instead: no entry leaves a folder without write
+    permission. `shutil.rmtree` calls `os.unlink`/`os.rmdir` with `dir_fd` = the folder.
+    """
+    def _guarded(real):
+        def call(path, *, dir_fd=None):
+            folder = dir_fd if dir_fd is not None else os.path.dirname(os.path.abspath(path))
+            if not os.stat(folder).st_mode & 0o200:
+                raise PermissionError(errno.EACCES, os.strerror(errno.EACCES), path)
+            return real(path, dir_fd=dir_fd)
+        return call
+
+    monkeypatch.setattr(os, "unlink", _guarded(os.unlink))
+    monkeypatch.setattr(os, "rmdir", _guarded(os.rmdir))
+
+
+def _root_owned(data, monkeypatch):
     """Files the API cannot delete: what a game running as root leaves behind (Arma Reforger's
     `profile/profile/.db`). A folder without write permission plays that role here."""
+    _with_the_apis_rights(monkeypatch)
     locked = data / "profile" / "profile" / ".db"
     locked.mkdir(parents=True)
     (locked / "save").write_text("x", encoding="utf-8")
@@ -244,11 +266,11 @@ def _root_owned(data):
     return locked
 
 
-def test_root_owned_files_are_deleted_by_the_cleanup_helper(mem_engine, world, tmp_path):
+def test_root_owned_files_are_deleted_by_the_cleanup_helper(mem_engine, world, tmp_path, monkeypatch):
     """Measured on the real stack: "8 entries … could not be deleted" (HTTP 500), the server
     stayed listed. The helper deletes them as root; the row and the folder are gone."""
     dk, data = world
-    locked = _root_owned(data)
+    locked = _root_owned(data, monkeypatch)
     try:
         out = _remove(mem_engine, delete_data=True)
     finally:
@@ -259,11 +281,11 @@ def test_root_owned_files_are_deleted_by_the_cleanup_helper(mem_engine, world, t
     assert _rows(mem_engine)[0] == []
 
 
-def test_the_cleanup_helper_sees_only_this_servers_folder(mem_engine, world, tmp_path):
+def test_the_cleanup_helper_sees_only_this_servers_folder(mem_engine, world, tmp_path, monkeypatch):
     """Root with a mount: the server's own (real) folder is the only one, no network, no
     capabilities beyond deleting, and it goes with its anonymous volumes."""
     dk, data = world
-    _root_owned(data)
+    _root_owned(data, monkeypatch)
     _remove(mem_engine, delete_data=True)
     (helper,) = dk.helpers
     assert helper["HostConfig"]["Binds"] == [f"{os.path.realpath(data)}:/x"]

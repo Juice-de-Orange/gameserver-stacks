@@ -34,7 +34,9 @@ _SHIMS = {
         'case "$*" in *.json*) echo \'{"9.9.9":{"linuxserver":{"urls":{"cdn":"https://cdn.example.com/s.tar.gz"},"md5":"abc"}}}\';;\n'
         '*) out=""; while [ $# -gt 0 ]; do [ "$1" = "-o" ] && out="$2"; shift; done; : > "$out";; esac'
     ),
-    "md5sum": "exit 0",
+    # Reads its input like the real one: the script pipes the checksum line in under
+    # `pipefail`, and a stand-in that exits first fails the `echo` with SIGPIPE now and then.
+    "md5sum": "cat >/dev/null",
     "tar": (
         'echo "tar uid=${FAKE_UID:-0} $*" >> "$CALLS"\n'
         'dest=""; while [ $# -gt 0 ]; do [ "$1" = "-C" ] && dest="$2"; shift; done; : > "$dest/VintagestoryServer.dll"'
