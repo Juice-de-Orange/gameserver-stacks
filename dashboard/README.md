@@ -50,7 +50,7 @@ What the steps do:
 | Step | Why |
 |---|---|
 | `./setup` | Copies `.env.example` to `.env` (mode 600), where every setting lives. Generates the four secrets: `POSTGRES_PASSWORD`, `JWT_SECRET`, `GSS_SECRET_KEY` and the one-time `SEED_ADMIN_PASSWORD`. Sets `DATA_ROOT`, the host directory for every server's files, to `data/servers` in this directory and creates it, owned by you. Prints the address and the one-time password. |
-| `docker compose up -d` | Starts the stack, with the images built from this checkout until a release is published (below). |
+| `docker compose up -d` | Starts the stack. Pulls the prebuilt images of the latest release from GHCR the first time (below). |
 
 `./setup` is safe to run again: an existing `.env` is never replaced, only values that are
 empty or still the template's `change-me…` are filled in, and the database password is not
@@ -255,7 +255,7 @@ dump costs nothing: see [operations](docs/operations.md#the-dashboard-database))
 
 ```bash
 git pull
-docker compose pull          # new prebuilt images, once releases are published
+docker compose pull          # the new prebuilt images
 docker compose up -d
 ```
 
@@ -278,9 +278,9 @@ are applied by the API at start. Read [`CHANGELOG.md`](../CHANGELOG.md) and the
    attached to it.)
 2. In the `dashboard/` directory:
    ```bash
-   docker compose --profile https --profile firewall down -v --rmi local
+   docker compose --profile https --profile firewall down -v
    ```
-   This removes the containers, networks, volumes and the images built here. The two
+   This removes the containers, networks and volumes; the images stay (step 4). The two
    `--profile` options make it include the volumes of the optional services even if you
    switched them off earlier; without them, `down -v` leaves those volumes behind.
 3. Delete what is left on disk. Some of it is not yours: `data/db` belongs to the database's
@@ -294,9 +294,20 @@ are applied by the API at start. Read [`CHANGELOG.md`](../CHANGELOG.md) and the
    and `db-backups/`; copy the dumps elsewhere first if you want to keep them. A `DATA_ROOT`
    outside the checkout goes the same way, through its parent directory: for `/mnt/games`,
    `docker run --rm -v /mnt:/p busybox:1.36 rm -rf /p/games`.
-4. The game images the dashboard pulled (often several GB each) and a Vintage Story runner you
-   built yourself stay in Docker's image store. List them with `docker image ls` and remove the
-   ones you no longer need by name, for example
+4. Remove the images. The dashboard's own ones:
+   ```bash
+   docker image ls 'ghcr.io/juice-de-orange/stacks-console-*'
+   docker image rm ghcr.io/juice-de-orange/stacks-console-api:latest ghcr.io/juice-de-orange/stacks-console-web:latest
+   ```
+   With `GSS_VERSION` set, its value is the tag instead of `latest`. The list also shows the
+   firewall helper (`-firewall`, profile `firewall`), the Steam Workshop helper (`-steamcmd`) and
+   the Vintage Story runner (`-vintagestory-runner`) if they were pulled; remove them the same
+   way. Images left over from earlier updates show `<none>` as their tag: remove those by their
+   IMAGE ID. The stack also pulled `postgres:16-alpine`, `tecnativa/docker-socket-proxy:v0.4.2`,
+   `caddy:2-alpine` (profile `https`) and `busybox:1.36` (step 3); other stacks on the host may
+   use them, so remove them only if nothing else does. The game images the dashboard pulled
+   (often several GB each) and a Vintage Story runner you built yourself stay as well. List them
+   with `docker image ls` and remove the ones you no longer need by name, for example
    `docker image rm stacks-console/vintagestory-runner:1`.
 
 ## Languages
