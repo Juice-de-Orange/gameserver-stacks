@@ -20,7 +20,9 @@ concurrency:
 
 jobs:
   backend:
-    # Same image as dashboard/backend/Dockerfile.
+    # Same image as dashboard/backend/Dockerfile. It runs as root here, the API as APP_UID and
+    # developers as their own uid: the suite must not depend on who runs it (tests that read
+    # the process's uid pin it).
     name: backend (ruff + pytest)
     runs-on: ubuntu-latest
     container: python:3.12-slim

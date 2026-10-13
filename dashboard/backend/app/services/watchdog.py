@@ -68,7 +68,10 @@ _INSTALL_LOG_TAIL = 5000
 @dataclass
 class _WdState:
     fail_count: int = 0
-    last_restart: float = 0.0     # monotonic time of the last auto-restart
+    # Monotonic time of the last auto-restart; `None` = none yet. Not `0.0`: the monotonic clock
+    # counts from the host's boot, so for the first `watchdog_cooldown_min` after a host boot
+    # `now - 0.0` looked like a cooldown, and a hanging server was not restarted.
+    last_restart: float | None = None
     suppress_until: float = 0.0   # monotonic — paused until then (boot window)
     in_incident: bool = False
     # Boot loop detection: an `unless-stopped` container that keeps crashing is restarted by
@@ -284,7 +287,7 @@ async def _check_server(server: GameServer, drv: GameDriver) -> None:
 
     if st.fail_count < settings.watchdog_fail_threshold:
         return
-    if now - st.last_restart < settings.watchdog_cooldown_min * 60:
+    if st.last_restart is not None and now - st.last_restart < settings.watchdog_cooldown_min * 60:
         return  # cooldown — avoid restart loops
 
     # Self-healing must not activate a broken mod configuration either: the server would run
