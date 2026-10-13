@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Stacks Console: starting a server that was stopped during `docker compose down` and `up -d`
+  answered with a raw 404 that named the socket proxy's URL. The start now says that the game
+  network the container points at no longer exists and to recreate the container
+  (`server.network_missing`). Failed starts, stops and restarts show Docker's own reason instead
+  of the proxy URL, and a host port held by another program now gets its own answer
+  (`server.port_in_use_host`) instead of the same raw error.
+
 ## [0.1.0] - 2026-10-13
 
 First release: seven game blocks and the Stacks Console dashboard, with prebuilt API and web

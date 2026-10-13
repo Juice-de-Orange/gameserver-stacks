@@ -109,6 +109,7 @@
   "server.game_type_unsupported": "Game type '{{game_type}}' is not supported yet",
   "server.key_exists": "Server key already exists",
   "server.key_invalid": "Invalid server key (a-z, 0-9, '-', 2–32 characters, no leading hyphen)",
+  "server.network_missing": "The container of '{{key}}' is attached to a Docker network that no longer exists, usually after docker compose down while the server was stopped. Recreate the container (Version page → Recreate) to attach it to the current game network; the world data stays as it is.",
   "server.not_found": "Server '{{key}}' not found",
   "server.operation_running": "Another operation is already running for this server: {{operation}}.",
   "server.remove_confirm": "Type the server key '{{key}}' to confirm the removal.",

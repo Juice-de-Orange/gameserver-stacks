@@ -31,7 +31,7 @@ from ..services import servers as servers_registry
 from ..services import watchdog
 from ..services.audit import record
 from ..services.backup import list_backups
-from ..services.docker_client import docker
+from ..services.docker_client import docker, missing_network
 from ..services.drivers import get_driver
 from ..services.fleet import connect_of
 from ..services.rcon import RconError
@@ -313,6 +313,21 @@ async def perform_action(
     except Exception as e:
         if (in_use := ports.docker_error(server, e)) is not None:
             raise in_use from None
+        if missing_network(e) is not None:
+            # A stopped server after `docker compose down` + `up -d`: its container still points
+            # at the removed game network. The socket proxy grants no `/networks/…`, so it
+            # cannot be reattached from here; a new container can (`missing_network`).
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                detail=err(
+                    "server.network_missing",
+                    "The container of '{key}' is attached to a Docker network that no longer "
+                    "exists, usually after docker compose down while the server was stopped. "
+                    "Recreate the container (Version page → Recreate) to attach it to the current "
+                    "game network; the world data stays as it is.",
+                    key=server.key,
+                ),
+            ) from None
         raise HTTPException(
             status.HTTP_502_BAD_GATEWAY,
             detail=err("server.docker_action_failed", "Docker action failed: {error}", error=str(e)),
