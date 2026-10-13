@@ -306,14 +306,13 @@ Take a database dump first (above). Then:
 
 ```bash
 git pull
-docker compose pull          # prebuilt images, once releases are published
+docker compose pull          # the new prebuilt images
 docker compose up -d
 ```
 
 `GSS_VERSION` in `.env` pins a release (`0.2.0`); without it you follow `latest`. If you build
-the images yourself (before the first release, or with `APP_UID` other than 1000), replace the
-last two commands with `docker compose up -d --build`. Until the first release `docker compose
-pull` reports `denied` for the two dashboard images; that is expected.
+the images yourself (`APP_UID` other than 1000, or local changes), replace the last two
+commands with `docker compose up -d --build`.
 
 The game servers keep running during the update. Read [`CHANGELOG.md`](../../CHANGELOG.md)
 first. Updating a game is a separate step in the dashboard (server → **Version**), with a backup

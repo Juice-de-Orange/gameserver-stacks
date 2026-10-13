@@ -64,7 +64,7 @@ Checked against the projects' own sites, docs and release pages on 2026-10-12.
 | Game servers run as | Docker containers | Docker containers | Docker containers | processes, or Docker containers | processes | processes in tmux |
 | Hosts | one | many (Wings daemon per node) | many (Wings per node) | several, from the Professional licence | one | one per install |
 | What the host needs | Docker with Compose; everything else in containers | PHP, MySQL or MariaDB, Redis, a web server; Docker on the nodes | PHP, a database (SQLite possible), a web server; Docker on the nodes | its installer (Linux or Windows) | Python and Java, or its Docker image | bash, tmux and per-game packages |
-| Latest release | none yet | 1.15.1 (2026-08-14) | 1.0.0-rc.1 (2026-10-10) | 2.8.0 (2026-06); AMP 3 in beta | 4.11.0 (2026-09-16) | 26.3.0 (2026-10-10) |
+| Latest release | 0.1.0 (2026-10-13) | 1.15.1 (2026-08-14) | 1.0.0-rc.1 (2026-10-10) | 2.8.0 (2026-06); AMP 3 in beta | 4.11.0 (2026-09-16) | 26.3.0 (2026-10-10) |
 
 When to choose which, honestly:
 
