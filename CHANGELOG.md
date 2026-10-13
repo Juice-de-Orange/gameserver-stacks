@@ -5,6 +5,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-13
+
+First release: seven game blocks and the Stacks Console dashboard, with prebuilt API and web
+images on GHCR (amd64 + arm64).
+
 ### Added
 
 - Game blocks: Arma Reforger, Avorion, Factorio 2.0, Minecraft (Paper), Project Zomboid (Build 42),

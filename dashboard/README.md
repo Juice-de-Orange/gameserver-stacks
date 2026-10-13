@@ -76,9 +76,8 @@ characters.
 
 **Images.** The compose file names prebuilt images on GHCR
 (`ghcr.io/juice-de-orange/stacks-console-api` and `-web`, tag `GSS_VERSION`, default `latest`).
-Once a release is published, `docker compose up -d` without `--build` pulls them. Until then the
-pull fails with `denied` and Compose builds the images from the checkout instead; `--build`
-does that directly.
+`docker compose up -d` without `--build` pulls them. If the pull fails, Compose builds the images
+from the checkout instead; `--build` does that directly.
 
 The two secrets you must keep:
 
@@ -260,7 +259,7 @@ docker compose pull          # new prebuilt images, once releases are published
 docker compose up -d
 ```
 
-If you build the images yourself (no release yet, or `APP_UID` other than 1000):
+If you build the images yourself (`APP_UID` other than 1000, or local changes):
 
 ```bash
 git pull
