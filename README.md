@@ -5,7 +5,7 @@ browser, and it downloads, configures, starts, backs up and restores it for you.
 
 ![Stacks Console: adding a Minecraft server, starting it, using the console, taking a backup](docs/media/hero.gif)
 
-> **Status:** early, no release yet. Seven games, each run end to end through the dashboard on a
+> **Status:** early — first release v0.1.0. Seven games, each run end to end through the dashboard on a
 > test host; see [Known limitations](#known-limitations).
 > **Languages:** the dashboard speaks English and German; the docs are English.
 
@@ -39,8 +39,8 @@ docker compose up -d
 `./setup` prints the address and a one-time password for `admin`. Open
 <http://127.0.0.1:8080> on the host (from elsewhere: `ssh -L 8080:127.0.0.1:8080
 you@your-server`), sign in, set your own password, choose your games and add the first server.
-No release is published yet, so `docker compose up -d` builds the images from the checkout (the
-pull from GHCR is refused, and Compose builds instead); from the first release on it pulls them.
+`docker compose up -d` pulls the prebuilt images from GHCR (amd64 and arm64); if the pull fails,
+Compose builds them from the checkout instead.
 If your uid is not 1000, `./setup` says so and the start is `docker compose up -d --build`.
 `./setup --help` lists the options: another data directory, the games, the port.
 
