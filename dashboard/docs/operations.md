@@ -382,3 +382,11 @@ Tested: `stop-all` and `start-recorded` against a running Minecraft server (stop
 eight seconds, started again from the record), `docker compose up -d --wait`, and
 `systemd-analyze verify` of the unit (systemd 257, in a container). The unit itself has not run
 through a real reboot.
+
+The unit never runs `docker compose down`. If you do, with a game server stopped, its container
+keeps pointing at the game network (`GAME_NETWORK`) that `down` removed, and
+`docker compose up -d` creates a new one. Starting that server then fails with "attached to a
+Docker network that no longer exists": the dashboard cannot reattach it, because the socket
+proxy grants no access to Docker's networks. Recreate its container on the server's **Version**
+page (**Recreate**: a backup, a new container, a boot check); it is running afterwards.
+`docker compose stop` and `start` keep the network.

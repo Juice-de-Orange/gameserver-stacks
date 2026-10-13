@@ -109,6 +109,7 @@
   "server.game_type_unsupported": "Spieltyp '{{game_type}}' wird noch nicht unterstützt",
   "server.key_exists": "Server-Key existiert bereits",
   "server.key_invalid": "Ungültiger Server-Key (a-z, 0-9, '-', 2–32 Zeichen, kein führender Bindestrich)",
+  "server.network_missing": "Der Container von '{{key}}' hängt an einem Docker-Netz, das es nicht mehr gibt, meist nach docker compose down bei gestopptem Server. Baue den Container neu auf (Seite Version → Neu aufbauen), damit er am aktuellen Spielnetz hängt; die Weltdaten bleiben, wie sie sind.",
   "server.not_found": "Server '{{key}}' nicht gefunden",
   "server.operation_running": "Für diesen Server läuft bereits: {{operation}}.",
   "server.remove_confirm": "Zur Bestätigung den Serverschlüssel '{{key}}' eintippen.",

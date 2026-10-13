@@ -90,6 +90,44 @@ def _demux(data: bytes) -> str:
     return text + d._rest.decode("utf-8", errors="replace")
 
 
+class DockerError(httpx.HTTPStatusError):
+    """Docker refused a request: its status and Docker's OWN message (`{"message": …}`).
+
+    `raise_for_status` names the proxy's URL instead ("Client error '404 Not Found' for url
+    'http://console-dockerproxy:2375/containers/…/start'"): no cause, and that is what a failed
+    start showed the user. A subclass of `HTTPStatusError`, so whoever catches that keeps working.
+    """
+
+    def __init__(self, response: httpx.Response) -> None:
+        try:
+            body = response.json()
+        except ValueError:
+            body = None
+        message = body.get("message") if isinstance(body, dict) else None
+        self.docker_message = str(message or response.text[:300] or response.reason_phrase)
+        super().__init__(f"{response.status_code}: {self.docker_message}",
+                         request=response.request, response=response)
+
+
+_NETWORK_GONE = re.compile(r"\bnetwork (\S+) not found")
+
+
+def missing_network(error: BaseException) -> str | None:
+    """The id of the network a container could not start on because it no longer exists.
+
+    `docker compose down` removes the game network when no RUNNING container is attached. A
+    stopped game container keeps the old network's id, `up` creates the network with a new one,
+    and `docker start` answers 404 "failed to set up container networking: network <id> not
+    found" — the container itself exists. Reconnecting it would need `/networks/…`, which the
+    socket proxy does not grant (`NETWORKS` is off in docker-compose.yml); the way back is a new
+    container. `None` for any other error, a missing container included.
+    """
+    if isinstance(error, DockerError) and error.response.status_code == 404:
+        if m := _NETWORK_GONE.search(error.docker_message):
+            return m.group(1)
+    return None
+
+
 class DockerClient:
     def __init__(self, base_url: str) -> None:
         self.base = base_url.rstrip("/")
@@ -239,7 +277,9 @@ class DockerClient:
         async with httpx.AsyncClient(timeout=http_timeout) as c:
             r = await c.post(f"{self.base}/containers/{name}/{action}{query}")
             if r.status_code not in (204, 304):
-                r.raise_for_status()
+                # Docker's reason, not the proxy URL: the callers show it (`server.docker_action_failed`,
+                # `start-recorded`) and read it (`ports.docker_error`, `missing_network`).
+                raise DockerError(r)
 
     async def logs(self, name: str, tail: int = 200, timestamps: bool = False, since: int | None = None) -> str:
         params = f"stdout=1&stderr=1&tail={tail}"
