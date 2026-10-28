@@ -168,6 +168,7 @@
   "UDP port players connect to (DefaultPort). Written into the server's .ini at every start.": "UDP port players connect to (DefaultPort). Written into the server's .ini at every start.",
   "UDP port players connect to. Factorio announces it to the server browser.": "UDP port players connect to. Factorio announces it to the server browser.",
   "Unmute": "Unmute",
+  "Unpacking the image…": "Unpacking the image…",
   "Usually needs an in-game admin position — test it live over RCON.": "Usually needs an in-game admin position — test it live over RCON.",
   "Vehicle ID": "Vehicle ID",
   "Version list is stale (the daily sync is failing) — hotfixes were not checked": "Version list is stale (the daily sync is failing) — hotfixes were not checked",

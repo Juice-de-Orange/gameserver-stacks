@@ -197,15 +197,43 @@ def prepare_data_dirs(server: GameServer) -> list[str]:
 
 
 def _pull_sink(step: Callable[..., None]):
-    """Docker reports progress per layer → one overall figure in bytes for the operation row."""
-    layers: dict[str, tuple[int, int]] = {}
+    """Docker reports progress per layer → one overall figure for the operation row.
+
+    Two phases, because Docker reports them differently (measured on Docker 29 with the
+    containerd image store, `python:3.11-bookworm`, 7 layers, 62 s):
+
+    * **Download**, in bytes. Only `Downloading` frames count: `Extracting` frames carry seconds
+      there (`"units": "s"`, no total), and with the older store bytes of a second pass that
+      would pull a finished layer back to zero. `Download complete` sends no final frame at
+      the full size, so it counts the layer as complete itself.
+    * **Unpacking**, in layers. It starts when every layer is downloaded and took 27 of the 62 s
+      in the measurement, with the byte figure frozen at 99 %; on a 10 GB image it is minutes.
+    """
+    layers: dict[str, tuple[int, int]] = {}  # layer id → (bytes downloaded, size)
+    announced: set[str] = set()  # every layer of the image (`Pulling fs layer`, `Already exists`)
+    downloaded: set[str] = set()
+    unpacked: set[str] = set()
 
     def sink(frame: dict) -> None:
         layer_id = str(frame.get("id") or "")
+        status_ = str(frame.get("status") or "")
         detail = frame.get("progressDetail") or {}
         total = detail.get("total")
-        if layer_id and isinstance(total, int) and total > 0:
+        if not layer_id:
+            return
+        if status_ in ("Pulling fs layer", "Already exists"):
+            announced.add(layer_id)
+        if status_ == "Downloading" and isinstance(total, int) and total > 0:
             layers[layer_id] = (int(detail.get("current") or 0), total)
+        elif status_ in ("Download complete", "Pull complete", "Already exists"):
+            downloaded.add(layer_id)
+            if layer_id in layers:
+                layers[layer_id] = (layers[layer_id][1], layers[layer_id][1])
+            if status_ != "Download complete":
+                unpacked.add(layer_id)
+        if announced and announced <= downloaded:
+            step("Unpacking the image…", current=len(announced & unpacked), total=len(announced))
+            return
         current = sum(c for c, _ in layers.values())
         whole = sum(t for _, t in layers.values())
         if whole:
