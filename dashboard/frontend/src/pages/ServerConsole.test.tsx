@@ -68,6 +68,26 @@ describe("the console of a Vintage Story server without the RCON mod", () => {
     expect(screen.queryByText(/✖/)).toBeNull();
   });
 
+  it("does not say connected and offers no commands", async () => {
+    // The socket opens and the backend greets as usual, but nothing behind it can answer.
+    vi.stubGlobal("WebSocket", fakeSocket([
+      { type: "error", message: { code: "console.vintagestory_rcon_mod_missing", message: "x", params: {} } },
+      { type: "info", message: "Connected as admin (full mode)" },
+    ]));
+    render(<ServerConsole />);
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 10));
+    });
+
+    expect(screen.getByText("The console needs a server mod")).toBeTruthy();
+    expect(screen.queryByText("connected")).toBeNull();
+    expect(screen.getByText("unavailable")).toBeTruthy();
+    expect(screen.queryByText(/Connected as admin/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "list clients" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Send" })).toBeNull();
+    expect(screen.queryByPlaceholderText("Enter a command…")).toBeNull();
+  });
+
   it("shows no card when the server has its console", async () => {
     vi.stubGlobal("WebSocket", fakeSocket([{ type: "info", message: "Connected as admin (full mode)" }]));
     render(<ServerConsole />);
@@ -75,6 +95,8 @@ describe("the console of a Vintage Story server without the RCON mod", () => {
       await new Promise((r) => setTimeout(r, 10));
     });
     expect(screen.queryByText("The console needs a server mod")).toBeNull();
+    expect(screen.getByText("connected")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "list clients" })).toBeTruthy();
   });
 
   it("asks for a new password in both places, and names the field on the edit page", async () => {

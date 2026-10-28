@@ -4,6 +4,7 @@
   "send": "Send",
   "state.connected": "connected",
   "state.disconnected": "disconnected",
+  "state.unavailable": "unavailable",
   "subtitle": "Live console",
   "title": "Console",
   "vsMod.guide": "Set-up guide",
