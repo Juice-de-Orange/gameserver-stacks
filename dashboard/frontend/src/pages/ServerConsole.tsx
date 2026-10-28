@@ -107,13 +107,22 @@ export default function ServerConsole() {
 
   if (!server) return <div className="py-8 text-center text-fg-dim">{t("noServer")}</div>;
   const quick = QUICK[server.game_type] ?? [];
+  // The socket itself opens without the mod, but nothing behind it can answer: no "connected",
+  // no log and no commands, only the card that says why.
+  const usable = modMissing == null;
 
   return (
     <div className="space-y-4">
       <SectionTitle
         icon={Terminal}
         sub={`${t("subtitle")} · ${server.display_name}`}
-        right={<Badge tone={connected ? "online" : "blood"}>{connected ? t("state.connected") : t("state.disconnected")}</Badge>}
+        right={
+          !usable ? (
+            <Badge tone="blood">{t("state.unavailable")}</Badge>
+          ) : (
+            <Badge tone={connected ? "online" : "blood"}>{connected ? t("state.connected") : t("state.disconnected")}</Badge>
+          )
+        }
       >
         {t("title")}
       </SectionTitle>
@@ -137,7 +146,7 @@ export default function ServerConsole() {
         </Card>
       )}
 
-      {quick.length > 0 && (
+      {usable && quick.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {quick.map((q) => (
             <GhostButton key={q} onClick={() => send(q)}>
@@ -147,38 +156,42 @@ export default function ServerConsole() {
         </div>
       )}
 
-      <Card className="!p-0">
-        <div
-          ref={boxRef}
-          className="h-[55vh] overflow-auto whitespace-pre-wrap p-3 font-mono text-xs text-fg-muted sm:h-[26rem]"
-        >
-          {lines.length === 0 ? (
-            <span className="text-fg-dim">{t("waiting")}</span>
-          ) : (
-            lines.map((l, i) => (
-              <div key={i} className="border-b border-surface-card/60 py-0.5">
-                {l}
-              </div>
-            ))
-          )}
-        </div>
-      </Card>
+      {usable && (
+        <Card className="!p-0">
+          <div
+            ref={boxRef}
+            className="h-[55vh] overflow-auto whitespace-pre-wrap p-3 font-mono text-xs text-fg-muted sm:h-[26rem]"
+          >
+            {lines.length === 0 ? (
+              <span className="text-fg-dim">{t("waiting")}</span>
+            ) : (
+              lines.map((l, i) => (
+                <div key={i} className="border-b border-surface-card/60 py-0.5">
+                  {l}
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
+      )}
 
-      <form
-        onSubmit={(e: FormEvent) => {
-          e.preventDefault();
-          send(cmd);
-        }}
-        className="flex gap-2"
-      >
-        <Input
-          value={cmd}
-          onChange={(e) => setCmd(e.target.value)}
-          placeholder={t("input")}
-          className="font-mono"
-        />
-        <Button type="submit">{t("send")}</Button>
-      </form>
+      {usable && (
+        <form
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault();
+            send(cmd);
+          }}
+          className="flex gap-2"
+        >
+          <Input
+            value={cmd}
+            onChange={(e) => setCmd(e.target.value)}
+            placeholder={t("input")}
+            className="font-mono"
+          />
+          <Button type="submit">{t("send")}</Button>
+        </form>
+      )}
     </div>
   );
 }
