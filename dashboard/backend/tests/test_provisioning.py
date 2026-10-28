@@ -11,6 +11,7 @@ What must hold, beyond what `test_cli_create_container.py` pins for the shared s
 import asyncio
 import json
 import os
+import pathlib
 
 import pytest
 from fastapi import HTTPException
@@ -147,6 +148,28 @@ def test_the_download_reports_bytes_to_the_operation(mem_engine, tmp_path, wired
     texts = [text for text, _, _ in steps.seen]
     assert texts.index("Creating the data directories…") < texts.index("Writing the configuration…") \
         < texts.index("Creating the container…")
+
+
+def test_the_bar_keeps_moving_while_a_real_pull_unpacks(mem_engine, tmp_path, wired):
+    """A real pull stream: after the last download Docker unpacks for a long time and reports
+    that in seconds, not bytes. The operation must say so and count the layers, not stand at
+    99 % (27 of 62 s here, minutes on a 10 GB image)."""
+    srv = _server(mem_engine, tmp_path)
+    raw = (pathlib.Path(__file__).parent / "fixtures" / "docker_pull_frames.jsonl").read_text()
+    frames = [json.loads(line) for line in raw.splitlines() if line and not line.startswith("#")]
+    wired(_Docker(image_present=False, frames=frames))
+    steps = _Steps()
+    asyncio.run(provisioning.provision(srv.key, progress=steps))
+
+    pulled = [(text, c, t) for text, c, t in steps.seen if t]
+    download = [(c, t) for text, c, t in pulled if text == "Downloading the image…"]
+    unpack = [(c, t) for text, c, t in pulled if text == "Unpacking the image…"]
+    assert download and unpack
+    # Unpacking follows the last download figure and counts every layer to the end.
+    assert pulled.index(("Unpacking the image…", *unpack[0])) > max(
+        i for i, (text, _, _) in enumerate(pulled) if text == "Downloading the image…")
+    assert unpack[-1] == (7, 7)
+    assert len(set(unpack)) > 2, unpack
 
 
 def test_minecraft_without_a_recorded_eula_gets_no_container(mem_engine, tmp_path, wired):
