@@ -353,9 +353,11 @@ def test_pz_reports_false_when_rcon_is_dead():
     assert asyncio.run(drv.graceful_shutdown(_srv())) is False
 
 
-@pytest.mark.parametrize("game", [GameType.avorion, GameType.valheim, GameType.vintagestory])
+@pytest.mark.parametrize(
+    "game", [GameType.arma_reforger, GameType.avorion, GameType.valheim, GameType.vintagestory],
+)
 def test_signal_path_games_get_no_console_attempt_and_no_warning(monkeypatch, caplog, game):
-    """Avorion, Valheim and Vintage Story stop cleanly on the signal (`docker stop`).
+    """Arma Reforger, Avorion, Valheim and Vintage Story stop cleanly on the signal (`docker stop`).
 
     With a `graceful_shutdown` of their own that only ever returned `False`, every stop waited
     the 2 s head start, sent nothing useful (Vintage Story: an unverified `stop` over the RCON

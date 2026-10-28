@@ -344,12 +344,12 @@ class ReforgerDriver(GameDriver):
             browser_name=str(game.get("name") or server.display_name or server.key),
         )
 
-    async def graceful_shutdown(self, server: GameServer) -> bool:
-        # Deliberately the default (`False`): Enfusion RCON has no shutdown verb, and the
-        # container handles signals itself (`StopSignal=SIGINT` on `python3 /launch.py`). The
-        # signal path from `lifecycle.stop_server` with the driver's grace period is the right
-        # one here.
-        return False
+    # No `graceful_shutdown` of its own: the `docker stop` IS the clean stop. The container
+    # handles the signal itself (`StopSignal=SIGINT` on `python3 /launch.py`; measured: "Save
+    # completed" and exit code 0 in under a second, see `stop_timeout`). An override that only
+    # returned `False` made `lifecycle` wait its head start and log "falling back to the signal
+    # path" on every stop, although that path was the right one. `#shutdown` over RCON is not
+    # used: what it answers and whether it saves first has not been measured.
 
     # --- Log/event parsing (best effort; calibrate against real Reforger container logs) ---
     def parse_events(self, server: GameServer, log_text: str) -> list[ServerEvent]:
